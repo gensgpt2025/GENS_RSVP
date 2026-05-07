@@ -21,6 +21,11 @@ export type SyncedSheetEvent = {
   endIso: string;
 };
 
+export type SyncedSheetMember = {
+  name: string;
+  number: number | null;
+};
+
 function base64Url(input: string | Buffer) {
   return Buffer.from(input).toString("base64").replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
 }
@@ -148,4 +153,51 @@ export async function fetchSheetEvents() {
 
   const data = (await response.json()) as { values?: string[][] };
   return rowsToObjects(data.values ?? []).map(rowToEvent).filter((event): event is SyncedSheetEvent => Boolean(event));
+}
+
+function memberNameFromRow(row: string[]) {
+  const cleaned = row.map((cell) => cell?.trim() ?? "").filter(Boolean);
+  if (cleaned.length === 0) return null;
+
+  const firstNumber = cleaned.find((cell) => /^\d+$/.test(cell));
+  const number = firstNumber ? Number(firstNumber) : null;
+  const name = cleaned.find((cell) => !/^\d+$/.test(cell));
+  if (!name) return null;
+
+  return {
+    name: number === null ? name : `${number} ${name}`,
+    number,
+  };
+}
+
+export async function fetchSheetMembers() {
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  const range = process.env.GOOGLE_MEMBERS_RANGE || process.env.PLAYERS_RANGE || "players!A2:E";
+  if (!sheetId) throw new Error("GOOGLE_SHEET_ID is required.");
+
+  const token = await getAccessToken();
+  const url = new URL(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}`);
+  url.searchParams.set("majorDimension", "ROWS");
+  url.searchParams.set("valueRenderOption", "FORMATTED_VALUE");
+
+  const response = await fetch(url, {
+    headers: { authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch Google Sheet members: ${response.status}`);
+  }
+
+  const data = (await response.json()) as { values?: string[][] };
+  const seen = new Set<string>();
+  return (data.values ?? [])
+    .map(memberNameFromRow)
+    .filter((member): member is SyncedSheetMember => Boolean(member))
+    .filter((member) => {
+      const key = member.name.replace(/\s+/g, " ").trim().toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 }

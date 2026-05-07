@@ -5,8 +5,14 @@ import { redirect } from "next/navigation";
 import { loginAsMember, logout, requireUser } from "@/lib/auth";
 import { ensureSchema, sql } from "@/lib/db";
 import { hashPassword } from "@/lib/security";
-import { fetchSheetEvents } from "@/lib/sheets";
+import { fetchSheetEvents, fetchSheetMembers } from "@/lib/sheets";
 import type { RsvpStatus } from "@/lib/types";
+
+export type MemberFormState = {
+  message: string;
+  needsConfirmation: boolean;
+  pendingName: string;
+};
 
 function readString(formData: FormData, name: string) {
   return String(formData.get(name) ?? "").trim();
@@ -60,12 +66,27 @@ export async function logoutAction() {
   redirect("/");
 }
 
-export async function createMemberAction(formData: FormData) {
+export async function createMemberAction(_: MemberFormState, formData: FormData): Promise<MemberFormState> {
   await requireUser();
   await ensureSchema();
 
   const name = readString(formData, "name");
-  if (!name) return;
+  const confirmed = readString(formData, "confirm_duplicate") === "yes";
+  if (!name) return { message: "名前を入力してください。", needsConfirmation: false, pendingName: "" };
+
+  const existing = await sql`
+    SELECT id FROM members
+    WHERE lower(regexp_replace(name, '\\s+', ' ', 'g')) = lower(regexp_replace(${name}, '\\s+', ' ', 'g'))
+    LIMIT 1
+  `;
+
+  if (existing.rowCount > 0 && !confirmed) {
+    return {
+      message: "同じ名前のメンバーがすでに登録されています。追加する場合は確認して登録してください。",
+      needsConfirmation: true,
+      pendingName: name,
+    };
+  }
 
   await sql`
     INSERT INTO members (id, name, email, password_hash, role)
@@ -73,6 +94,7 @@ export async function createMemberAction(formData: FormData) {
   `;
 
   revalidatePath("/");
+  return { message: "メンバーを登録しました。", needsConfirmation: false, pendingName: "" };
 }
 
 export async function createEventAction(formData: FormData) {
@@ -203,6 +225,51 @@ export async function syncSheetEventsAction() {
           end_at = EXCLUDED.end_at
     `;
   }
+
+  revalidatePath("/");
+  revalidatePath("/calendar");
+  revalidatePath("/history");
+}
+
+export async function syncSheetMembersAction() {
+  await requireUser();
+  await ensureSchema();
+
+  const sheetMembers = await fetchSheetMembers();
+  if (sheetMembers.length === 0) return;
+
+  const sheetNames = sheetMembers.map((member) => member.name);
+
+  for (const member of sheetMembers) {
+    await sql`
+      INSERT INTO members (id, name, email, password_hash, role)
+      SELECT ${crypto.randomUUID()}, ${member.name}, ${memberLoginEmail(member.name)}, ${hashPassword(crypto.randomUUID())}, 'member'
+      WHERE NOT EXISTS (
+        SELECT 1 FROM members
+        WHERE lower(regexp_replace(name, '\\s+', ' ', 'g')) = lower(regexp_replace(${member.name}, '\\s+', ' ', 'g'))
+      )
+    `;
+  }
+
+  await sql`
+    DELETE FROM members
+    WHERE NOT (name = ANY(${sheetNames}))
+  `;
+
+  await sql`
+    DELETE FROM members
+    WHERE id IN (
+      SELECT id
+      FROM (
+        SELECT id, row_number() OVER (
+          PARTITION BY lower(regexp_replace(name, '\\s+', ' ', 'g'))
+          ORDER BY created_at ASC
+        ) AS duplicate_number
+        FROM members
+      ) duplicates
+      WHERE duplicate_number > 1
+    )
+  `;
 
   revalidatePath("/");
   revalidatePath("/calendar");

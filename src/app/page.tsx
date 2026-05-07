@@ -1,16 +1,17 @@
-import { CalendarPlus, Check, Clock, Download, MapPin, Shield, UserPlus, Users, X } from "lucide-react";
+import { CalendarPlus, Check, Clock, Download, MapPin, Shield, Users, X } from "lucide-react";
 import {
   createEventAction,
-  createMemberAction,
   deleteEventAction,
   deleteMemberAction,
   logoutAction,
   rsvpAction,
   syncSheetEventsAction,
+  syncSheetMembersAction,
   updateEventAction,
 } from "@/app/actions";
 import { EventForm } from "@/app/event-form";
 import { LoginForm } from "@/app/login-form";
+import { MemberForm } from "@/app/member-form";
 import { getCurrentUser } from "@/lib/auth";
 import { formatEventRange, googleCalendarUrl, toDateTimeRangeInput } from "@/lib/calendar";
 import { ensureSchema, sql } from "@/lib/db";
@@ -215,16 +216,12 @@ export default async function Home() {
                 <h2>メンバー追加</h2>
               </div>
             </div>
-            <form action={createMemberAction} className="stack-form">
-              <label>
-                <span>名前</span>
-                <input name="name" required />
-              </label>
+            <form action={syncSheetMembersAction} className="sync-form">
               <button className="secondary-button" type="submit">
-                <UserPlus size={18} />
-                登録
+                HPメンバー同期
               </button>
             </form>
+            <MemberForm />
 
             <form action={deleteMemberAction} className="stack-form member-control-form">
               <label>

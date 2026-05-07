@@ -222,6 +222,17 @@ button:hover,
   font-size: 14px;
 }
 
+.warning-message {
+  border: 1px solid rgba(255, 125, 125, 0.32);
+  border-radius: 8px;
+  background: rgba(255, 125, 125, 0.08);
+  color: var(--red);
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 0;
+  padding: 10px 12px;
+}
+
 .app-shell {
   width: min(1440px, 100%);
   margin: 0 auto;
