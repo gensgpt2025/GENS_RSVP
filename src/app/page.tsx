@@ -3,9 +3,9 @@ import {
   createEventAction,
   createMemberAction,
   deleteEventAction,
+  deleteMemberAction,
   logoutAction,
   rsvpAction,
-  toggleMemberActiveAction,
   updateEventAction,
 } from "@/app/actions";
 import { LoginForm } from "@/app/login-form";
@@ -122,7 +122,7 @@ export default async function Home() {
         <div className="metric-card">
           <Users size={18} />
           <span>メンバー</span>
-          <strong>{members.filter((member) => member.active).length}</strong>
+          <strong>{members.length}</strong>
         </div>
       </section>
 
@@ -286,22 +286,24 @@ export default async function Home() {
               </button>
             </form>
 
-            <form action={toggleMemberActiveAction} className="stack-form member-control-form">
+            <form action={deleteMemberAction} className="stack-form member-control-form">
               <label>
-                <span>停止・再開するメンバー</span>
+                <span>削除するメンバー</span>
                 <select name="member_id" required defaultValue="">
                   <option value="" disabled>
                     メンバーを選択
                   </option>
-                  {members.map((member) => (
-                    <option value={member.id} key={member.id}>
-                      {member.name} / {member.active ? "利用中" : "停止中"}
-                    </option>
-                  ))}
+                  {members
+                    .filter((member) => member.id !== user.id)
+                    .map((member) => (
+                      <option value={member.id} key={member.id}>
+                        {member.name}
+                      </option>
+                    ))}
                 </select>
               </label>
-              <button className="ghost-button" type="submit">
-                状態を切替
+              <button className="danger-button" type="submit">
+                メンバーを削除
               </button>
             </form>
 
@@ -312,7 +314,7 @@ export default async function Home() {
                     <strong>{member.name}</strong>
                     <span>メンバー選択で入室</span>
                   </div>
-                  <span className={member.active ? "pill active" : "pill"}>{member.active ? "利用中" : "停止中"}</span>
+                  <span className="pill active">利用中</span>
                 </div>
               ))}
             </div>

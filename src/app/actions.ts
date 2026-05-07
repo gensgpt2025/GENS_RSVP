@@ -138,13 +138,13 @@ export async function rsvpAction(formData: FormData) {
   revalidatePath("/");
 }
 
-export async function toggleMemberActiveAction(formData: FormData) {
+export async function deleteMemberAction(formData: FormData) {
   const user = await requireUser();
   const memberId = readString(formData, "member_id");
   if (!memberId || memberId === user.id) return;
 
   await ensureSchema();
-  await sql`UPDATE members SET active = NOT active WHERE id = ${memberId}`;
+  await sql`DELETE FROM members WHERE id = ${memberId}`;
   revalidatePath("/");
 }
 
