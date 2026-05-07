@@ -8,9 +8,10 @@ import {
   rsvpAction,
   updateEventAction,
 } from "@/app/actions";
+import { EventForm } from "@/app/event-form";
 import { LoginForm } from "@/app/login-form";
 import { getCurrentUser } from "@/lib/auth";
-import { formatEventRange, googleCalendarUrl, toDatetimeLocalValue } from "@/lib/calendar";
+import { formatEventRange, googleCalendarUrl, toDateTimeRangeInput } from "@/lib/calendar";
 import { ensureSchema, sql } from "@/lib/db";
 import { attendeeNames, countByStatus, getEventsWithRsvps, getMembers, type EventWithRsvps } from "@/lib/events";
 import type { Member, Rsvp, RsvpStatus } from "@/lib/types";
@@ -37,6 +38,18 @@ async function getActiveMembers() {
 
 function myStatus(rsvps: Rsvp[], userId: string) {
   return rsvps.find((rsvp) => rsvp.user_id === userId)?.status;
+}
+
+function eventFormDefaults(event: EventWithRsvps) {
+  const match = event.title.match(/^(練習試合|県リーグ)\s+vs\s+(.+)$/);
+  return {
+    id: event.id,
+    category: match ? match[1] : event.title === "県リーグ" || event.title === "練習試合" || event.title === "トレーニング" ? event.title : "トレーニング",
+    opponent: match?.[2] ?? "",
+    datetimeRange: toDateTimeRangeInput(event.start_at, event.end_at),
+    location: event.location ?? "",
+    description: event.description ?? "",
+  };
 }
 
 export default async function Home() {
@@ -163,32 +176,7 @@ export default async function Home() {
 
                   <details className="edit-event-panel">
                     <summary>予定を修正</summary>
-                    <form action={updateEventAction} className="stack-form">
-                      <input type="hidden" name="event_id" value={event.id} />
-                      <label>
-                        <span>タイトル</span>
-                        <input name="title" defaultValue={event.title} required />
-                      </label>
-                      <label>
-                        <span>場所</span>
-                        <input name="location" defaultValue={event.location ?? ""} />
-                      </label>
-                      <label>
-                        <span>開始</span>
-                        <input name="start_at" type="datetime-local" defaultValue={toDatetimeLocalValue(event.start_at)} required />
-                      </label>
-                      <label>
-                        <span>終了</span>
-                        <input name="end_at" type="datetime-local" defaultValue={toDatetimeLocalValue(event.end_at)} required />
-                      </label>
-                      <label>
-                        <span>詳細</span>
-                        <textarea name="description" rows={3} defaultValue={event.description ?? ""} />
-                      </label>
-                      <button className="secondary-button" type="submit">
-                        修正を保存
-                      </button>
-                    </form>
+                    <EventForm action={updateEventAction} buttonLabel="修正を保存" defaults={eventFormDefaults(event)} />
                   </details>
 
                   <form action={deleteEventAction} className="admin-inline-form">
@@ -211,32 +199,7 @@ export default async function Home() {
                 <h2>イベント追加</h2>
               </div>
             </div>
-            <form action={createEventAction} className="stack-form">
-              <label>
-                <span>タイトル</span>
-                <input name="title" required />
-              </label>
-              <label>
-                <span>場所</span>
-                <input name="location" />
-              </label>
-              <label>
-                <span>開始</span>
-                <input name="start_at" type="datetime-local" required />
-              </label>
-              <label>
-                <span>終了</span>
-                <input name="end_at" type="datetime-local" required />
-              </label>
-              <label>
-                <span>詳細</span>
-                <textarea name="description" rows={4} />
-              </label>
-              <button className="primary-button" type="submit">
-                <CalendarPlus size={18} />
-                追加
-              </button>
-            </form>
+            <EventForm action={createEventAction} buttonLabel="追加" />
           </section>
 
           <section className="tool-panel">

@@ -83,3 +83,9 @@ export function toDatetimeLocalValue(value: string) {
   const valueParts = parts(value);
   return `${valueParts.year}-${valueParts.month.padStart(2, "0")}-${valueParts.day.padStart(2, "0")}T${valueParts.hour}:${valueParts.minute}`;
 }
+
+export function toDateTimeRangeInput(start: string, end: string) {
+  const startParts = parts(start);
+  const endParts = parts(end);
+  return `${startParts.year}/${startParts.month.padStart(2, "0")}/${startParts.day.padStart(2, "0")} ${startParts.hour}:${startParts.minute}-${endParts.hour}:${endParts.minute}`;
+}

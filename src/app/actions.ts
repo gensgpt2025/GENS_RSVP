@@ -11,13 +11,31 @@ function readString(formData: FormData, name: string) {
   return String(formData.get(name) ?? "").trim();
 }
 
-function japanDateTimeToIso(value: string) {
-  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/);
+function japanDateTimeRangeToIso(value: string) {
+  const normalized = value
+    .replace(/[０-９]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xfee0))
+    .replace(/[／]/g, "/")
+    .replace(/[：]/g, ":")
+    .replace(/[ー－−]/g, "-")
+    .replace(/\s+/g, " ")
+    .trim();
+  const match = normalized.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})\s+(\d{1,2}):(\d{2})-(\d{1,2})[:-](\d{2})$/);
   if (!match) return null;
 
-  const [, year, month, day, hour, minute] = match.map(Number);
-  const timestamp = Date.UTC(year, month - 1, day, hour - 9, minute);
-  return new Date(timestamp).toISOString();
+  const [, year, month, day, startHour, startMinute, endHour, endMinute] = match.map(Number);
+  const start = new Date(Date.UTC(year, month - 1, day, startHour - 9, startMinute));
+  const end = new Date(Date.UTC(year, month - 1, day, endHour - 9, endMinute));
+  if (end <= start) return null;
+
+  return { startIso: start.toISOString(), endIso: end.toISOString() };
+}
+
+function eventTitle(category: string, opponent: string) {
+  if ((category === "練習試合" || category === "県リーグ") && opponent) {
+    return `${category} vs ${opponent}`;
+  }
+
+  return category;
 }
 
 function memberLoginEmail(name: string) {
@@ -60,17 +78,17 @@ export async function createEventAction(formData: FormData) {
   const user = await requireUser();
   await ensureSchema();
 
-  const title = readString(formData, "title");
+  const category = readString(formData, "category");
+  const opponent = readString(formData, "opponent");
+  const title = eventTitle(category, opponent);
   const description = readString(formData, "description");
   const location = readString(formData, "location");
-  const start = readString(formData, "start_at");
-  const end = readString(formData, "end_at");
+  const datetimeRange = readString(formData, "datetime_range");
 
-  if (!title || !start || !end) return;
+  if (!category || !datetimeRange) return;
 
-  const startIso = japanDateTimeToIso(start);
-  const endIso = japanDateTimeToIso(end);
-  if (!startIso || !endIso || new Date(endIso) <= new Date(startIso)) return;
+  const range = japanDateTimeRangeToIso(datetimeRange);
+  if (!range) return;
 
   await sql`
     INSERT INTO events (id, title, description, location, start_at, end_at, created_by)
@@ -79,8 +97,8 @@ export async function createEventAction(formData: FormData) {
       ${title},
       ${description || null},
       ${location || null},
-      ${startIso},
-      ${endIso},
+      ${range.startIso},
+      ${range.endIso},
       ${user.id}
     )
   `;
@@ -93,25 +111,25 @@ export async function updateEventAction(formData: FormData) {
   await ensureSchema();
 
   const eventId = readString(formData, "event_id");
-  const title = readString(formData, "title");
+  const category = readString(formData, "category");
+  const opponent = readString(formData, "opponent");
+  const title = eventTitle(category, opponent);
   const description = readString(formData, "description");
   const location = readString(formData, "location");
-  const start = readString(formData, "start_at");
-  const end = readString(formData, "end_at");
+  const datetimeRange = readString(formData, "datetime_range");
 
-  if (!eventId || !title || !start || !end) return;
+  if (!eventId || !category || !datetimeRange) return;
 
-  const startIso = japanDateTimeToIso(start);
-  const endIso = japanDateTimeToIso(end);
-  if (!startIso || !endIso || new Date(endIso) <= new Date(startIso)) return;
+  const range = japanDateTimeRangeToIso(datetimeRange);
+  if (!range) return;
 
   await sql`
     UPDATE events
     SET title = ${title},
         description = ${description || null},
         location = ${location || null},
-        start_at = ${startIso},
-        end_at = ${endIso}
+        start_at = ${range.startIso},
+        end_at = ${range.endIso}
     WHERE id = ${eventId}
   `;
 
