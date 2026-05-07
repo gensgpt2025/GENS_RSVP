@@ -1,8 +1,15 @@
 import { CalendarPlus, Check, Clock, Download, MapPin, Shield, UserPlus, Users, X } from "lucide-react";
-import { createEventAction, createMemberAction, deleteEventAction, logoutAction, rsvpAction, toggleMemberActiveAction } from "@/app/actions";
+import {
+  createEventAction,
+  createMemberAction,
+  deleteEventAction,
+  logoutAction,
+  rsvpAction,
+  toggleMemberActiveAction,
+} from "@/app/actions";
 import { LoginForm } from "@/app/login-form";
 import { getCurrentUser } from "@/lib/auth";
-import { googleCalendarUrl, formatDateTime } from "@/lib/calendar";
+import { formatDateTime, googleCalendarUrl } from "@/lib/calendar";
 import { ensureSchema, sql } from "@/lib/db";
 import type { EventItem, Member, Rsvp, RsvpStatus } from "@/lib/types";
 
@@ -17,6 +24,18 @@ const statusLabels: Record<RsvpStatus, string> = {
   declined: "欠席",
   maybe: "未定",
 };
+
+async function getActiveMembers() {
+  await ensureSchema();
+  const { rows } = await sql`
+    SELECT id, name, email, role, active, created_at
+    FROM members
+    WHERE active = TRUE
+    ORDER BY created_at ASC
+  `;
+
+  return rows as Member[];
+}
 
 async function getDashboardData() {
   await ensureSchema();
@@ -45,20 +64,36 @@ function myStatus(rsvps: Rsvp[], userId: string) {
   return rsvps.find((rsvp) => rsvp.user_id === userId)?.status;
 }
 
+function AdminCredentialFields() {
+  return (
+    <div className="admin-auth-grid">
+      <label>
+        <span>管理者メール</span>
+        <input name="admin_email" type="email" autoComplete="username" required />
+      </label>
+      <label>
+        <span>管理者パスワード</span>
+        <input name="admin_password" type="password" autoComplete="current-password" required />
+      </label>
+    </div>
+  );
+}
+
 export default async function Home() {
   const user = await getCurrentUser();
 
   if (!user) {
+    const members = await getActiveMembers();
     return (
       <main className="auth-screen">
         <section className="auth-visual">
           <div className="orbital-panel">
             <span />
             <strong>Persistent</strong>
-            <p>Vercel Postgresに保存し、端末やブラウザが変わっても同じ予定を共有します。</p>
+            <p>予定と出欠はデータベースに保存され、端末やブラウザを変えても同じ情報を共有できます。</p>
           </div>
         </section>
-        <LoginForm />
+        <LoginForm members={members} />
       </main>
     );
   }
@@ -77,7 +112,9 @@ export default async function Home() {
           <Shield size={16} />
           <span>{user.name}</span>
           <form action={logoutAction}>
-            <button className="ghost-button" type="submit">ログアウト</button>
+            <button className="ghost-button" type="submit">
+              退出
+            </button>
           </form>
         </div>
       </header>
@@ -111,7 +148,7 @@ export default async function Home() {
 
           <div className="event-list">
             {events.length === 0 ? <p className="empty-state">まだ予定はありません。</p> : null}
-            {events.map((event) => {
+            {events.map((event: EventWithRsvps) => {
               const currentStatus = myStatus(event.rsvps, user.id);
               return (
                 <article className="event-card" key={event.id}>
@@ -151,13 +188,7 @@ export default async function Home() {
                   <form action={rsvpAction} className="rsvp-form">
                     <input type="hidden" name="event_id" value={event.id} />
                     {(["attending", "declined", "maybe"] as RsvpStatus[]).map((status) => (
-                      <button
-                        className={currentStatus === status ? "status-button active" : "status-button"}
-                        key={status}
-                        name="status"
-                        value={status}
-                        type="submit"
-                      >
+                      <button className={currentStatus === status ? "status-button active" : "status-button"} key={status} name="status" value={status} type="submit">
                         {status === "attending" ? <Check size={16} /> : status === "declined" ? <X size={16} /> : <Clock size={16} />}
                         {statusLabels[status]}
                       </button>
@@ -166,9 +197,12 @@ export default async function Home() {
                   </form>
 
                   {isAdmin ? (
-                    <form action={deleteEventAction}>
+                    <form action={deleteEventAction} className="admin-inline-form">
                       <input type="hidden" name="event_id" value={event.id} />
-                      <button className="danger-button" type="submit">イベント削除</button>
+                      <AdminCredentialFields />
+                      <button className="danger-button" type="submit">
+                        イベント削除
+                      </button>
                     </form>
                   ) : null}
                 </article>
@@ -187,6 +221,7 @@ export default async function Home() {
                 </div>
               </div>
               <form action={createEventAction} className="stack-form">
+                <AdminCredentialFields />
                 <label>
                   <span>タイトル</span>
                   <input name="title" required />
@@ -218,21 +253,14 @@ export default async function Home() {
               <div className="section-heading">
                 <div>
                   <p className="eyebrow">Members</p>
-                  <h2>メンバー登録</h2>
+                  <h2>メンバー追加</h2>
                 </div>
               </div>
               <form action={createMemberAction} className="stack-form">
+                <AdminCredentialFields />
                 <label>
                   <span>名前</span>
                   <input name="name" required />
-                </label>
-                <label>
-                  <span>メール</span>
-                  <input name="email" type="email" required />
-                </label>
-                <label>
-                  <span>初期パスワード</span>
-                  <input name="password" type="password" minLength={8} required />
                 </label>
                 <label>
                   <span>権限</span>
@@ -241,24 +269,49 @@ export default async function Home() {
                     <option value="admin">管理者</option>
                   </select>
                 </label>
+                <label>
+                  <span>新しい管理者メール</span>
+                  <input name="new_admin_email" type="email" placeholder="管理者を追加する場合のみ" />
+                </label>
+                <label>
+                  <span>新しい管理者パスワード</span>
+                  <input name="new_admin_password" type="password" minLength={8} placeholder="管理者を追加する場合のみ" />
+                </label>
                 <button className="secondary-button" type="submit">
                   <UserPlus size={18} />
                   登録
                 </button>
               </form>
 
+              <form action={toggleMemberActiveAction} className="stack-form member-control-form">
+                <AdminCredentialFields />
+                <label>
+                  <span>停止・再開するメンバー</span>
+                  <select name="member_id" required defaultValue="">
+                    <option value="" disabled>
+                      メンバーを選択
+                    </option>
+                    {members.map((member) => (
+                      <option value={member.id} key={member.id}>
+                        {member.name} / {member.active ? "利用中" : "停止中"}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <button className="ghost-button" type="submit">
+                  状態を切替
+                </button>
+              </form>
+
               <div className="member-list">
                 {members.map((member) => (
-                  <form className="member-row" action={toggleMemberActiveAction} key={member.id}>
-                    <input type="hidden" name="member_id" value={member.id} />
+                  <div className="member-row" key={member.id}>
                     <div>
                       <strong>{member.name}</strong>
-                      <span>{member.email}</span>
+                      <span>{member.role === "admin" ? member.email : "メール不要ログイン"}</span>
                     </div>
-                    <button className={member.active ? "pill active" : "pill"} type="submit">
-                      {member.active ? member.role : "停止中"}
-                    </button>
-                  </form>
+                    <span className={member.active ? "pill active" : "pill"}>{member.active ? member.role : "停止中"}</span>
+                  </div>
                 ))}
               </div>
             </section>

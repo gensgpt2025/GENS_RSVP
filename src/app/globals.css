@@ -380,6 +380,28 @@ button:hover,
   gap: 13px;
 }
 
+.admin-auth-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  border: 1px solid rgba(201, 168, 106, 0.24);
+  border-radius: 8px;
+  background: rgba(201, 168, 106, 0.07);
+  padding: 12px;
+}
+
+.admin-inline-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.member-control-form {
+  border-top: 1px solid var(--line);
+  margin-top: 18px;
+  padding-top: 18px;
+}
+
 .member-list {
   display: grid;
   gap: 8px;
@@ -456,5 +478,9 @@ button:hover,
   .auth-visual,
   .login-panel {
     padding: 24px;
+  }
+
+  .admin-auth-grid {
+    grid-template-columns: 1fr;
   }
 }

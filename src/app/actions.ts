@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { loginWithPassword, logout, requireAdmin, requireUser } from "@/lib/auth";
+import { loginAsMember, logout, requireUser, verifyAdminCredentials } from "@/lib/auth";
 import { ensureSchema, sql } from "@/lib/db";
 import { hashPassword } from "@/lib/security";
 import type { RsvpStatus } from "@/lib/types";
@@ -20,8 +20,27 @@ function japanDateTimeToIso(value: string) {
   return new Date(timestamp).toISOString();
 }
 
+async function requireAdminForm(formData: FormData) {
+  const admin = await verifyAdminCredentials(readString(formData, "admin_email"), readString(formData, "admin_password"));
+  if (!admin) {
+    return null;
+  }
+
+  return admin;
+}
+
+function memberLoginEmail(name: string) {
+  const slug = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 32);
+
+  return `${slug || "member"}-${crypto.randomUUID()}@members.local`;
+}
+
 export async function loginAction(_: unknown, formData: FormData) {
-  const result = await loginWithPassword(readString(formData, "email"), readString(formData, "password"));
+  const result = await loginAsMember(readString(formData, "member_id"));
   if (result.ok) redirect("/");
   return result;
 }
@@ -32,15 +51,18 @@ export async function logoutAction() {
 }
 
 export async function createMemberAction(formData: FormData) {
-  await requireAdmin();
-  await ensureSchema();
+  const admin = await requireAdminForm(formData);
+  if (!admin) return;
 
+  await ensureSchema();
   const name = readString(formData, "name");
-  const email = readString(formData, "email").toLowerCase();
-  const password = readString(formData, "password");
   const role = readString(formData, "role") === "admin" ? "admin" : "member";
 
-  if (!name || !email || password.length < 8) return;
+  if (!name) return;
+
+  const email = role === "admin" ? readString(formData, "new_admin_email").toLowerCase() : memberLoginEmail(name);
+  const password = role === "admin" ? readString(formData, "new_admin_password") : crypto.randomUUID();
+  if (role === "admin" && (!email || password.length < 8)) return;
 
   await sql`
     INSERT INTO members (id, name, email, password_hash, role)
@@ -56,9 +78,10 @@ export async function createMemberAction(formData: FormData) {
 }
 
 export async function createEventAction(formData: FormData) {
-  const admin = await requireAdmin();
-  await ensureSchema();
+  const admin = await requireAdminForm(formData);
+  if (!admin) return;
 
+  await ensureSchema();
   const title = readString(formData, "title");
   const description = readString(formData, "description");
   const location = readString(formData, "location");
@@ -109,9 +132,11 @@ export async function rsvpAction(formData: FormData) {
 }
 
 export async function toggleMemberActiveAction(formData: FormData) {
-  await requireAdmin();
+  const admin = await requireAdminForm(formData);
+  if (!admin) return;
+
   const memberId = readString(formData, "member_id");
-  if (!memberId) return;
+  if (!memberId || memberId === admin.id) return;
 
   await ensureSchema();
   await sql`UPDATE members SET active = NOT active WHERE id = ${memberId}`;
@@ -119,7 +144,9 @@ export async function toggleMemberActiveAction(formData: FormData) {
 }
 
 export async function deleteEventAction(formData: FormData) {
-  await requireAdmin();
+  const admin = await requireAdminForm(formData);
+  if (!admin) return;
+
   const eventId = readString(formData, "event_id");
   if (!eventId) return;
 
