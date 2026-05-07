@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { loginAsMember, logout, requireUser } from "@/lib/auth";
 import { ensureSchema, sql } from "@/lib/db";
 import { hashPassword } from "@/lib/security";
+import { fetchSheetEvents } from "@/lib/sheets";
 import type { RsvpStatus } from "@/lib/types";
 
 function readString(formData: FormData, name: string) {
@@ -174,4 +175,36 @@ export async function deleteEventAction(formData: FormData) {
   await ensureSchema();
   await sql`DELETE FROM events WHERE id = ${eventId}`;
   revalidatePath("/");
+}
+
+export async function syncSheetEventsAction() {
+  const user = await requireUser();
+  await ensureSchema();
+
+  const events = await fetchSheetEvents();
+  for (const event of events) {
+    await sql`
+      INSERT INTO events (id, sheet_id, title, description, location, start_at, end_at, created_by)
+      VALUES (
+        ${crypto.randomUUID()},
+        ${event.sheetId},
+        ${event.title},
+        ${event.description},
+        ${event.location},
+        ${event.startIso},
+        ${event.endIso},
+        ${user.id}
+      )
+      ON CONFLICT (sheet_id) WHERE sheet_id IS NOT NULL DO UPDATE
+      SET title = EXCLUDED.title,
+          description = EXCLUDED.description,
+          location = EXCLUDED.location,
+          start_at = EXCLUDED.start_at,
+          end_at = EXCLUDED.end_at
+    `;
+  }
+
+  revalidatePath("/");
+  revalidatePath("/calendar");
+  revalidatePath("/history");
 }

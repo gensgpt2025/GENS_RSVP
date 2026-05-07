@@ -48,6 +48,7 @@ async function createSchema() {
   await sql`
     CREATE TABLE IF NOT EXISTS events (
       id TEXT PRIMARY KEY,
+      sheet_id TEXT UNIQUE,
       title TEXT NOT NULL,
       description TEXT,
       location TEXT,
@@ -57,6 +58,9 @@ async function createSchema() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `;
+
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS sheet_id TEXT`;
+  await sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_events_sheet_id ON events(sheet_id) WHERE sheet_id IS NOT NULL`;
 
   await sql`
     CREATE TABLE IF NOT EXISTS rsvps (

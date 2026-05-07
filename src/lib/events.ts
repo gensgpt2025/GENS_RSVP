@@ -35,7 +35,15 @@ export async function getEventsWithRsvps(where: "upcoming" | "past" | "all" = "a
 
 export async function getMembers() {
   await ensureSchema();
-  const { rows } = await sql`SELECT id, name, email, role, active, created_at FROM members ORDER BY created_at ASC`;
+  const { rows } = await sql`
+    SELECT id, name, email, role, active, created_at
+    FROM members
+    ORDER BY
+      CASE WHEN name ~ '^[0-9]+' THEN 0 ELSE 1 END,
+      CASE WHEN name ~ '^[0-9]+' THEN substring(name from '^[0-9]+')::int ELSE NULL END ASC,
+      name ASC,
+      created_at ASC
+  `;
   return rows as Member[];
 }
 

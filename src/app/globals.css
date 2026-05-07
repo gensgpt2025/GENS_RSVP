@@ -410,6 +410,10 @@ button:hover,
   gap: 13px;
 }
 
+.sync-form {
+  margin-bottom: 14px;
+}
+
 .admin-auth-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

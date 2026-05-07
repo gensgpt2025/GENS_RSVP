@@ -12,6 +12,7 @@ export type Member = {
 
 export type EventItem = {
   id: string;
+  sheet_id: string | null;
   title: string;
   description: string | null;
   location: string | null;

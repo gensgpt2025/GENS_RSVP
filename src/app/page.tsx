@@ -6,6 +6,7 @@ import {
   deleteMemberAction,
   logoutAction,
   rsvpAction,
+  syncSheetEventsAction,
   updateEventAction,
 } from "@/app/actions";
 import { EventForm } from "@/app/event-form";
@@ -199,6 +200,11 @@ export default async function Home() {
                 <h2>イベント追加</h2>
               </div>
             </div>
+            <form action={syncSheetEventsAction} className="sync-form">
+              <button className="secondary-button" type="submit">
+                スプレッドシート同期
+              </button>
+            </form>
             <EventForm action={createEventAction} buttonLabel="追加" />
           </section>
 
