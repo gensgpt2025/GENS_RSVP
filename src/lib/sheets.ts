@@ -155,17 +155,46 @@ export async function fetchSheetEvents() {
   return rowsToObjects(data.values ?? []).map(rowToEvent).filter((event): event is SyncedSheetEvent => Boolean(event));
 }
 
+function columnToIndex(value?: string) {
+  if (!value) return null;
+  const trimmed = value.trim().toUpperCase();
+  if (/^\d+$/.test(trimmed)) return Number(trimmed) - 1;
+  if (/^[A-Z]+$/.test(trimmed)) {
+    return trimmed.split("").reduce((total, char) => total * 26 + char.charCodeAt(0) - 64, 0) - 1;
+  }
+  return null;
+}
+
+function hasJapanese(value: string) {
+  return /[ぁ-んァ-ヶ一-龠々]/.test(value);
+}
+
+function formatMemberName(number: number | null, displayName: string) {
+  const normalizedName = displayName.replace(/\s+/g, " ").trim();
+  if (number === null || normalizedName.startsWith(`${number} `)) return normalizedName;
+  return `${number} ${normalizedName}`;
+}
+
 function memberNameFromRow(row: string[]) {
   const cleaned = row.map((cell) => cell?.trim() ?? "").filter(Boolean);
   if (cleaned.length === 0) return null;
 
-  const firstNumber = cleaned.find((cell) => /^\d+$/.test(cell));
-  const number = firstNumber ? Number(firstNumber) : null;
-  const name = cleaned.find((cell) => !/^\d+$/.test(cell));
+  const numberColumn = columnToIndex(process.env.GOOGLE_MEMBERS_NUMBER_COLUMN);
+  const nameColumn = columnToIndex(process.env.GOOGLE_MEMBERS_NAME_COLUMN);
+
+  const configuredNumber = numberColumn === null ? null : row[numberColumn]?.trim();
+  const numericCells = cleaned.filter((cell) => /^\d+$/.test(cell));
+  const numberSource = configuredNumber || (numericCells.length > 1 ? numericCells[1] : numericCells[0]);
+  const number = numberSource && /^\d+$/.test(numberSource) ? Number(numberSource) : null;
+
+  const configuredName = nameColumn === null ? null : row[nameColumn]?.trim();
+  const textCells = cleaned.filter((cell) => !/^\d+$/.test(cell));
+  const japaneseName = [...textCells].reverse().find(hasJapanese);
+  const name = configuredName || japaneseName || textCells[textCells.length - 1];
   if (!name) return null;
 
   return {
-    name: number === null ? name : `${number} ${name}`,
+    name: formatMemberName(number, name),
     number,
   };
 }
