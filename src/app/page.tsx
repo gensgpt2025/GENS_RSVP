@@ -6,6 +6,8 @@ import { googleCalendarUrl, formatDateTime } from "@/lib/calendar";
 import { ensureSchema, sql } from "@/lib/db";
 import type { EventItem, Member, Rsvp, RsvpStatus } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 type EventWithRsvps = EventItem & {
   rsvps: Rsvp[];
 };

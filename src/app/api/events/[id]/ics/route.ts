@@ -5,6 +5,8 @@ import { icsForEvent } from "@/lib/calendar";
 import { ensureSchema, sql } from "@/lib/db";
 import type { EventItem } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
   await requireUser();
   await ensureSchema();
