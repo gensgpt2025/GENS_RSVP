@@ -310,11 +310,7 @@ export default async function Home() {
             <div className="member-list">
               {members.map((member) => (
                 <div className="member-row" key={member.id}>
-                  <div>
-                    <strong>{member.name}</strong>
-                    <span>メンバー選択で入室</span>
-                  </div>
-                  <span className="pill active">利用中</span>
+                  <strong>{member.name}</strong>
                 </div>
               ))}
             </div>
