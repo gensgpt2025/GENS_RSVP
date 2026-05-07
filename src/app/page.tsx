@@ -64,21 +64,6 @@ function myStatus(rsvps: Rsvp[], userId: string) {
   return rsvps.find((rsvp) => rsvp.user_id === userId)?.status;
 }
 
-function AdminCredentialFields() {
-  return (
-    <div className="admin-auth-grid">
-      <label>
-        <span>管理者メール</span>
-        <input name="admin_email" type="email" autoComplete="username" required />
-      </label>
-      <label>
-        <span>管理者パスワード</span>
-        <input name="admin_password" type="password" autoComplete="current-password" required />
-      </label>
-    </div>
-  );
-}
-
 export default async function Home() {
   const user = await getCurrentUser();
 
@@ -99,7 +84,6 @@ export default async function Home() {
   }
 
   const { events, members } = await getDashboardData();
-  const isAdmin = user.role === "admin";
 
   return (
     <main className="app-shell">
@@ -196,127 +180,104 @@ export default async function Home() {
                     <input name="note" placeholder="メモ任意" aria-label="メモ" />
                   </form>
 
-                  {isAdmin ? (
-                    <form action={deleteEventAction} className="admin-inline-form">
-                      <input type="hidden" name="event_id" value={event.id} />
-                      <AdminCredentialFields />
-                      <button className="danger-button" type="submit">
-                        イベント削除
-                      </button>
-                    </form>
-                  ) : null}
+                  <form action={deleteEventAction} className="admin-inline-form">
+                    <input type="hidden" name="event_id" value={event.id} />
+                    <button className="danger-button" type="submit">
+                      イベント削除
+                    </button>
+                  </form>
                 </article>
               );
             })}
           </div>
         </section>
 
-        {isAdmin ? (
-          <aside className="admin-panel">
-            <section className="tool-panel">
-              <div className="section-heading">
-                <div>
-                  <p className="eyebrow">Admin</p>
-                  <h2>イベント追加</h2>
-                </div>
+        <aside className="admin-panel">
+          <section className="tool-panel">
+            <div className="section-heading">
+              <div>
+                <p className="eyebrow">Events</p>
+                <h2>イベント追加</h2>
               </div>
-              <form action={createEventAction} className="stack-form">
-                <AdminCredentialFields />
-                <label>
-                  <span>タイトル</span>
-                  <input name="title" required />
-                </label>
-                <label>
-                  <span>場所</span>
-                  <input name="location" />
-                </label>
-                <label>
-                  <span>開始</span>
-                  <input name="start_at" type="datetime-local" required />
-                </label>
-                <label>
-                  <span>終了</span>
-                  <input name="end_at" type="datetime-local" required />
-                </label>
-                <label>
-                  <span>詳細</span>
-                  <textarea name="description" rows={4} />
-                </label>
-                <button className="primary-button" type="submit">
-                  <CalendarPlus size={18} />
-                  追加
-                </button>
-              </form>
-            </section>
+            </div>
+            <form action={createEventAction} className="stack-form">
+              <label>
+                <span>タイトル</span>
+                <input name="title" required />
+              </label>
+              <label>
+                <span>場所</span>
+                <input name="location" />
+              </label>
+              <label>
+                <span>開始</span>
+                <input name="start_at" type="datetime-local" required />
+              </label>
+              <label>
+                <span>終了</span>
+                <input name="end_at" type="datetime-local" required />
+              </label>
+              <label>
+                <span>詳細</span>
+                <textarea name="description" rows={4} />
+              </label>
+              <button className="primary-button" type="submit">
+                <CalendarPlus size={18} />
+                追加
+              </button>
+            </form>
+          </section>
 
-            <section className="tool-panel">
-              <div className="section-heading">
-                <div>
-                  <p className="eyebrow">Members</p>
-                  <h2>メンバー追加</h2>
-                </div>
+          <section className="tool-panel">
+            <div className="section-heading">
+              <div>
+                <p className="eyebrow">Members</p>
+                <h2>メンバー追加</h2>
               </div>
-              <form action={createMemberAction} className="stack-form">
-                <AdminCredentialFields />
-                <label>
-                  <span>名前</span>
-                  <input name="name" required />
-                </label>
-                <label>
-                  <span>権限</span>
-                  <select name="role" defaultValue="member">
-                    <option value="member">メンバー</option>
-                    <option value="admin">管理者</option>
-                  </select>
-                </label>
-                <label>
-                  <span>新しい管理者メール</span>
-                  <input name="new_admin_email" type="email" placeholder="管理者を追加する場合のみ" />
-                </label>
-                <label>
-                  <span>新しい管理者パスワード</span>
-                  <input name="new_admin_password" type="password" minLength={8} placeholder="管理者を追加する場合のみ" />
-                </label>
-                <button className="secondary-button" type="submit">
-                  <UserPlus size={18} />
-                  登録
-                </button>
-              </form>
+            </div>
+            <form action={createMemberAction} className="stack-form">
+              <label>
+                <span>名前</span>
+                <input name="name" required />
+              </label>
+              <button className="secondary-button" type="submit">
+                <UserPlus size={18} />
+                登録
+              </button>
+            </form>
 
-              <form action={toggleMemberActiveAction} className="stack-form member-control-form">
-                <AdminCredentialFields />
-                <label>
-                  <span>停止・再開するメンバー</span>
-                  <select name="member_id" required defaultValue="">
-                    <option value="" disabled>
-                      メンバーを選択
+            <form action={toggleMemberActiveAction} className="stack-form member-control-form">
+              <label>
+                <span>停止・再開するメンバー</span>
+                <select name="member_id" required defaultValue="">
+                  <option value="" disabled>
+                    メンバーを選択
+                  </option>
+                  {members.map((member) => (
+                    <option value={member.id} key={member.id}>
+                      {member.name} / {member.active ? "利用中" : "停止中"}
                     </option>
-                    {members.map((member) => (
-                      <option value={member.id} key={member.id}>
-                        {member.name} / {member.active ? "利用中" : "停止中"}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <button className="ghost-button" type="submit">
-                  状態を切替
-                </button>
-              </form>
+                  ))}
+                </select>
+              </label>
+              <button className="ghost-button" type="submit">
+                状態を切替
+              </button>
+            </form>
 
-              <div className="member-list">
-                {members.map((member) => (
-                  <div className="member-row" key={member.id}>
-                    <div>
-                      <strong>{member.name}</strong>
-                      <span>{member.role === "admin" ? member.email : "メール不要ログイン"}</span>
-                    </div>
-                    <span className={member.active ? "pill active" : "pill"}>{member.active ? member.role : "停止中"}</span>
+            <div className="member-list">
+              {members.map((member) => (
+                <div className="member-row" key={member.id}>
+                  <div>
+                    <strong>{member.name}</strong>
+                    <span>メンバー選択で入室</span>
                   </div>
-                ))}
-              </div>
-            </section>
-          </aside>
-        ) : null}
+                  <span className={member.active ? "pill active" : "pill"}>{member.active ? "利用中" : "停止中"}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        </aside>
       </div>
     </main>
   );

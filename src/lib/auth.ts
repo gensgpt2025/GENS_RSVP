@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ensureSchema, sql } from "@/lib/db";
-import { hashToken, verifyPassword } from "@/lib/security";
+import { hashToken } from "@/lib/security";
 import type { Member, SessionUser } from "@/lib/types";
 
 const SESSION_COOKIE = "gens_session";
@@ -40,24 +40,7 @@ export async function loginAsMember(memberId: string) {
   }
 
   await createSession(member.id);
-  return { ok: true, message: "ログインしました。" };
-}
-
-export async function verifyAdminCredentials(email: string, password: string) {
-  await ensureSchema();
-  const normalizedEmail = email.trim().toLowerCase();
-  const { rows } = await sql`
-    SELECT id, password_hash, active, role FROM members
-    WHERE email = ${normalizedEmail}
-    LIMIT 1
-  `;
-
-  const admin = rows[0] as { id: string; password_hash: string; active: boolean; role: string } | undefined;
-  if (!admin || !admin.active || admin.role !== "admin" || !verifyPassword(password, admin.password_hash)) {
-    return null;
-  }
-
-  return admin;
+  return { ok: true, message: "入室しました。" };
 }
 
 export async function logout() {

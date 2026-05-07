@@ -5,7 +5,7 @@ import { LogIn } from "lucide-react";
 import { loginAction } from "@/app/actions";
 import type { Member } from "@/lib/types";
 
-export function LoginForm({ members }: { members: Pick<Member, "id" | "name" | "role">[] }) {
+export function LoginForm({ members }: { members: Pick<Member, "id" | "name">[] }) {
   const [state, action, pending] = useActionState(loginAction, { ok: false, message: "" });
 
   return (
@@ -25,13 +25,12 @@ export function LoginForm({ members }: { members: Pick<Member, "id" | "name" | "
           {members.map((member) => (
             <option value={member.id} key={member.id}>
               {member.name}
-              {member.role === "admin" ? " / 管理者" : ""}
             </option>
           ))}
         </select>
       </label>
 
-      {members.length === 0 ? <p className="form-message">管理者アカウントを作成するため、環境変数を確認してください。</p> : null}
+      {members.length === 0 ? <p className="form-message">初期メンバーを作成するため、環境変数を確認してください。</p> : null}
       {state?.message ? <p className="form-message">{state.message}</p> : null}
 
       <button className="primary-button" type="submit" disabled={pending || members.length === 0}>
