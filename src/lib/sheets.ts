@@ -15,6 +15,8 @@ type SheetRow = {
 export type SyncedSheetEvent = {
   sheetId: string;
   title: string;
+  eventType: string;
+  opponent: string | null;
   description: string | null;
   location: string | null;
   startIso: string;
@@ -101,13 +103,19 @@ function rowToEvent(row: SheetRow): SyncedSheetEvent | null {
   const endIso = toIso(date, end);
   if (!startIso || !endIso || new Date(endIso) <= new Date(startIso)) return null;
 
-  const category = mapType(row.type, row.title);
-  const title = (category === "練習試合" || category === "県リーグ") && row.opponent ? `${category} vs ${row.opponent}` : category;
+  const eventType = row.type.trim().toLowerCase();
+  const showOpponent = eventType === "match" || eventType === "league";
 
   return {
     sheetId: row.id,
-    title,
-    description: row.notes || null,
+    title: mapType(row.type, row.title),
+    eventType,
+    opponent: showOpponent && row.opponent ? row.opponent : null,
+    description: JSON.stringify({
+      notes: row.notes || "",
+      type: eventType,
+      opponent: showOpponent && row.opponent ? row.opponent : "",
+    }),
     location: row.location || null,
     startIso,
     endIso,

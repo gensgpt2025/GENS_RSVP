@@ -54,3 +54,18 @@ export function countByStatus(rsvps: Rsvp[], status: Rsvp["status"]) {
 export function attendeeNames(rsvps: Rsvp[]) {
   return rsvps.filter((rsvp) => rsvp.status === "attending").map((rsvp) => rsvp.member_name).filter(Boolean);
 }
+
+export function eventMeta(event: { description: string | null; title: string }) {
+  if (!event.description) return { notes: "", type: "", opponent: "" };
+
+  try {
+    const parsed = JSON.parse(event.description) as { notes?: string; type?: string; opponent?: string };
+    return {
+      notes: parsed.notes ?? "",
+      type: parsed.type ?? "",
+      opponent: parsed.opponent ?? "",
+    };
+  } catch {
+    return { notes: event.description, type: "", opponent: "" };
+  }
+}

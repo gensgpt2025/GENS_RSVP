@@ -2,7 +2,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Shield } from "lucide-react";
 import { logoutAction } from "@/app/actions";
 import { getCurrentUser } from "@/lib/auth";
 import { formatEventRange } from "@/lib/calendar";
-import { getEventsWithRsvps } from "@/lib/events";
+import { eventMeta, getEventsWithRsvps } from "@/lib/events";
 
 export const dynamic = "force-dynamic";
 
@@ -133,12 +133,18 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
               <div className={outside ? "calendar-day outside" : "calendar-day"} key={key}>
                 <span className="calendar-date">{day.getDate()}</span>
                 <div className="calendar-events">
-                  {dayEvents.map((event) => (
-                    <div className="calendar-event" key={event.id}>
-                      <strong>{event.title}</strong>
-                      <span>{formatEventRange(event.start_at, event.end_at)}</span>
-                    </div>
-                  ))}
+                  {dayEvents.map((event) => {
+                    const meta = eventMeta(event);
+                    const showOpponent = (meta.type === "match" || meta.type === "league") && meta.opponent;
+                    return (
+                      <div className="calendar-event" key={event.id}>
+                        <strong>{event.title}</strong>
+                        <span>{formatEventRange(event.start_at, event.end_at)}</span>
+                        {event.location ? <span>{event.location}</span> : null}
+                        {showOpponent ? <span>対戦相手: {meta.opponent}</span> : null}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );

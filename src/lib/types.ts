@@ -14,6 +14,8 @@ export type EventItem = {
   id: string;
   sheet_id: string | null;
   title: string;
+  event_type?: string;
+  opponent?: string;
   description: string | null;
   location: string | null;
   start_at: string;
