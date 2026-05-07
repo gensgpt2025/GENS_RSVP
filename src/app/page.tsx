@@ -115,19 +115,14 @@ export default async function Home() {
 
       <section className="summary-grid">
         <div className="metric-card">
-          <CalendarPlus size={20} />
+          <CalendarPlus size={18} />
           <span>予定</span>
           <strong>{events.length}</strong>
         </div>
         <div className="metric-card">
-          <Users size={20} />
+          <Users size={18} />
           <span>メンバー</span>
           <strong>{members.filter((member) => member.active).length}</strong>
-        </div>
-        <div className="metric-card">
-          <Check size={20} />
-          <span>あなたの回答済み</span>
-          <strong>{events.filter((event) => myStatus(event.rsvps, user.id)).length}</strong>
         </div>
       </section>
 
@@ -193,7 +188,6 @@ export default async function Home() {
                         {statusLabels[status]}
                       </button>
                     ))}
-                    <input name="note" placeholder="メモ任意" aria-label="メモ" />
                   </form>
 
                   <details className="edit-event-panel">

@@ -260,8 +260,8 @@ button:hover,
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(2, minmax(110px, 180px));
+  gap: 10px;
   margin-bottom: 18px;
 }
 
@@ -279,16 +279,17 @@ button:hover,
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 12px;
-  padding: 18px;
+  gap: 8px;
+  padding: 10px 12px;
 }
 
 .metric-card span {
   color: var(--muted);
+  font-size: 13px;
 }
 
 .metric-card strong {
-  font-size: 28px;
+  font-size: 20px;
 }
 
 .content-grid {
@@ -354,10 +355,6 @@ button:hover,
 .rsvp-form {
   gap: 8px;
   flex-wrap: wrap;
-}
-
-.rsvp-form input {
-  flex: 1 1 180px;
 }
 
 .status-button.active {
@@ -487,7 +484,7 @@ button:hover,
   }
 
   .summary-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

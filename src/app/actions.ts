@@ -124,15 +124,14 @@ export async function rsvpAction(formData: FormData) {
 
   const eventId = readString(formData, "event_id");
   const status = readString(formData, "status") as RsvpStatus;
-  const note = readString(formData, "note");
   if (!eventId || !["attending", "declined", "maybe"].includes(status)) return;
 
   await sql`
     INSERT INTO rsvps (event_id, user_id, status, note, updated_at)
-    VALUES (${eventId}, ${user.id}, ${status}, ${note || null}, NOW())
+    VALUES (${eventId}, ${user.id}, ${status}, null, NOW())
     ON CONFLICT (event_id, user_id) DO UPDATE
     SET status = EXCLUDED.status,
-        note = EXCLUDED.note,
+        note = null,
         updated_at = NOW()
   `;
 
