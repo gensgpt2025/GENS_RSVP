@@ -6,7 +6,6 @@ import {
   logoutAction,
   rsvpAction,
   syncSheetEventsAction,
-  syncSheetMembersAction,
   updateEventAction,
 } from "@/app/actions";
 import { EventForm } from "@/app/event-form";
@@ -216,11 +215,6 @@ export default async function Home() {
                 <h2>メンバー追加</h2>
               </div>
             </div>
-            <form action={syncSheetMembersAction} className="sync-form">
-              <button className="secondary-button" type="submit">
-                HPメンバー同期
-              </button>
-            </form>
             <MemberForm />
 
             <form action={deleteMemberAction} className="stack-form member-control-form">

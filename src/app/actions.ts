@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { loginAsMember, logout, requireUser } from "@/lib/auth";
 import { ensureSchema, sql } from "@/lib/db";
 import { hashPassword } from "@/lib/security";
-import { fetchSheetEvents, fetchSheetMembers } from "@/lib/sheets";
+import { fetchSheetEvents } from "@/lib/sheets";
 import type { RsvpStatus } from "@/lib/types";
 
 export type MemberFormState = {
@@ -225,51 +225,6 @@ export async function syncSheetEventsAction() {
           end_at = EXCLUDED.end_at
     `;
   }
-
-  revalidatePath("/");
-  revalidatePath("/calendar");
-  revalidatePath("/history");
-}
-
-export async function syncSheetMembersAction() {
-  await requireUser();
-  await ensureSchema();
-
-  const sheetMembers = await fetchSheetMembers();
-  if (sheetMembers.length === 0) return;
-
-  const sheetNames = sheetMembers.map((member) => member.name);
-
-  for (const member of sheetMembers) {
-    await sql`
-      INSERT INTO members (id, name, email, password_hash, role)
-      SELECT ${crypto.randomUUID()}, ${member.name}, ${memberLoginEmail(member.name)}, ${hashPassword(crypto.randomUUID())}, 'member'
-      WHERE NOT EXISTS (
-        SELECT 1 FROM members
-        WHERE lower(regexp_replace(name, '\\s+', ' ', 'g')) = lower(regexp_replace(${member.name}, '\\s+', ' ', 'g'))
-      )
-    `;
-  }
-
-  await sql`
-    DELETE FROM members
-    WHERE NOT (name = ANY(${sheetNames}))
-  `;
-
-  await sql`
-    DELETE FROM members
-    WHERE id IN (
-      SELECT id
-      FROM (
-        SELECT id, row_number() OVER (
-          PARTITION BY lower(regexp_replace(name, '\\s+', ' ', 'g'))
-          ORDER BY created_at ASC
-        ) AS duplicate_number
-        FROM members
-      ) duplicates
-      WHERE duplicate_number > 1
-    )
-  `;
 
   revalidatePath("/");
   revalidatePath("/calendar");
