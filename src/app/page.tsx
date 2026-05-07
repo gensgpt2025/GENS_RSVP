@@ -6,10 +6,11 @@ import {
   logoutAction,
   rsvpAction,
   toggleMemberActiveAction,
+  updateEventAction,
 } from "@/app/actions";
 import { LoginForm } from "@/app/login-form";
 import { getCurrentUser } from "@/lib/auth";
-import { formatDateTime, googleCalendarUrl } from "@/lib/calendar";
+import { formatEventRange, googleCalendarUrl, toDatetimeLocalValue } from "@/lib/calendar";
 import { ensureSchema, sql } from "@/lib/db";
 import type { EventItem, Member, Rsvp, RsvpStatus } from "@/lib/types";
 
@@ -41,7 +42,12 @@ async function getDashboardData() {
   await ensureSchema();
   const [events, rsvps, members] = await Promise.all([
     sql`SELECT * FROM events ORDER BY start_at ASC`,
-    sql`SELECT * FROM rsvps ORDER BY updated_at DESC`,
+    sql`
+      SELECT rsvps.*, members.name AS member_name
+      FROM rsvps
+      INNER JOIN members ON members.id = rsvps.user_id
+      ORDER BY rsvps.updated_at DESC
+    `,
     sql`SELECT id, name, email, role, active, created_at FROM members ORDER BY created_at ASC`,
   ]);
 
@@ -62,6 +68,10 @@ function countByStatus(rsvps: Rsvp[], status: RsvpStatus) {
 
 function myStatus(rsvps: Rsvp[], userId: string) {
   return rsvps.find((rsvp) => rsvp.user_id === userId)?.status;
+}
+
+function attendeeNames(rsvps: Rsvp[]) {
+  return rsvps.filter((rsvp) => rsvp.status === "attending").map((rsvp) => rsvp.member_name).filter(Boolean);
 }
 
 export default async function Home() {
@@ -134,6 +144,7 @@ export default async function Home() {
             {events.length === 0 ? <p className="empty-state">まだ予定はありません。</p> : null}
             {events.map((event: EventWithRsvps) => {
               const currentStatus = myStatus(event.rsvps, user.id);
+              const attendees = attendeeNames(event.rsvps);
               return (
                 <article className="event-card" key={event.id}>
                   <div className="event-main">
@@ -141,7 +152,7 @@ export default async function Home() {
                       <h3>{event.title}</h3>
                       <p className="event-time">
                         <Clock size={16} />
-                        {formatDateTime(event.start_at)} - {formatDateTime(event.end_at)}
+                        {formatEventRange(event.start_at, event.end_at)}
                       </p>
                       {event.location ? (
                         <p className="event-time">
@@ -169,6 +180,11 @@ export default async function Home() {
                     <span>未定 {countByStatus(event.rsvps, "maybe")}</span>
                   </div>
 
+                  <div className="attendee-box">
+                    <strong>出席メンバー</strong>
+                    <p>{attendees.length > 0 ? attendees.join("、") : "まだ出席回答はありません。"}</p>
+                  </div>
+
                   <form action={rsvpAction} className="rsvp-form">
                     <input type="hidden" name="event_id" value={event.id} />
                     {(["attending", "declined", "maybe"] as RsvpStatus[]).map((status) => (
@@ -179,6 +195,36 @@ export default async function Home() {
                     ))}
                     <input name="note" placeholder="メモ任意" aria-label="メモ" />
                   </form>
+
+                  <details className="edit-event-panel">
+                    <summary>予定を修正</summary>
+                    <form action={updateEventAction} className="stack-form">
+                      <input type="hidden" name="event_id" value={event.id} />
+                      <label>
+                        <span>タイトル</span>
+                        <input name="title" defaultValue={event.title} required />
+                      </label>
+                      <label>
+                        <span>場所</span>
+                        <input name="location" defaultValue={event.location ?? ""} />
+                      </label>
+                      <label>
+                        <span>開始</span>
+                        <input name="start_at" type="datetime-local" defaultValue={toDatetimeLocalValue(event.start_at)} required />
+                      </label>
+                      <label>
+                        <span>終了</span>
+                        <input name="end_at" type="datetime-local" defaultValue={toDatetimeLocalValue(event.end_at)} required />
+                      </label>
+                      <label>
+                        <span>詳細</span>
+                        <textarea name="description" rows={3} defaultValue={event.description ?? ""} />
+                      </label>
+                      <button className="secondary-button" type="submit">
+                        修正を保存
+                      </button>
+                    </form>
+                  </details>
 
                   <form action={deleteEventAction} className="admin-inline-form">
                     <input type="hidden" name="event_id" value={event.id} />

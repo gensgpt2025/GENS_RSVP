@@ -48,3 +48,38 @@ export function formatDateTime(value: string) {
     timeZone: "Asia/Tokyo",
   }).format(new Date(value));
 }
+
+function parts(value: string) {
+  const date = new Date(value);
+  const items = new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Tokyo",
+  }).formatToParts(date);
+
+  return Object.fromEntries(items.map((item) => [item.type, item.value]));
+}
+
+export function formatEventRange(start: string, end: string) {
+  const startParts = parts(start);
+  const endParts = parts(end);
+  const startDate = `${startParts.year}/${startParts.month}/${startParts.day}`;
+  const endDate = `${endParts.year}/${endParts.month}/${endParts.day}`;
+  const startTime = `${startParts.hour}:${startParts.minute}`;
+  const endTime = `${endParts.hour}:${endParts.minute}`;
+
+  if (startDate === endDate) {
+    return `${startDate} ${startTime}-${endTime}`;
+  }
+
+  return `${startDate} ${startTime}-${endDate} ${endTime}`;
+}
+
+export function toDatetimeLocalValue(value: string) {
+  const valueParts = parts(value);
+  return `${valueParts.year}-${valueParts.month.padStart(2, "0")}-${valueParts.day.padStart(2, "0")}T${valueParts.hour}:${valueParts.minute}`;
+}

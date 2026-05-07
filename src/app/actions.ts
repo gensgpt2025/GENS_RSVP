@@ -88,6 +88,36 @@ export async function createEventAction(formData: FormData) {
   revalidatePath("/");
 }
 
+export async function updateEventAction(formData: FormData) {
+  await requireUser();
+  await ensureSchema();
+
+  const eventId = readString(formData, "event_id");
+  const title = readString(formData, "title");
+  const description = readString(formData, "description");
+  const location = readString(formData, "location");
+  const start = readString(formData, "start_at");
+  const end = readString(formData, "end_at");
+
+  if (!eventId || !title || !start || !end) return;
+
+  const startIso = japanDateTimeToIso(start);
+  const endIso = japanDateTimeToIso(end);
+  if (!startIso || !endIso || new Date(endIso) <= new Date(startIso)) return;
+
+  await sql`
+    UPDATE events
+    SET title = ${title},
+        description = ${description || null},
+        location = ${location || null},
+        start_at = ${startIso},
+        end_at = ${endIso}
+    WHERE id = ${eventId}
+  `;
+
+  revalidatePath("/");
+}
+
 export async function rsvpAction(formData: FormData) {
   const user = await requireUser();
   await ensureSchema();

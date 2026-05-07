@@ -366,6 +366,39 @@ button:hover,
   color: var(--gold);
 }
 
+.attendee-box {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.035);
+  margin-bottom: 12px;
+  padding: 12px;
+}
+
+.attendee-box strong {
+  display: block;
+  color: var(--gold);
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.attendee-box p {
+  color: var(--muted);
+  margin-bottom: 0;
+}
+
+.edit-event-panel {
+  border-top: 1px solid var(--line);
+  margin-top: 16px;
+  padding-top: 14px;
+}
+
+.edit-event-panel summary {
+  color: var(--gold);
+  cursor: pointer;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
 .admin-panel {
   display: grid;
   gap: 18px;

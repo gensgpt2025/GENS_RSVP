@@ -24,6 +24,7 @@ export type EventItem = {
 export type Rsvp = {
   event_id: string;
   user_id: string;
+  member_name?: string;
   status: RsvpStatus;
   note: string | null;
   updated_at: string;
