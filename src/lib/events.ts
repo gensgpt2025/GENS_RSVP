@@ -1,0 +1,48 @@
+import { ensureSchema, sql } from "@/lib/db";
+import type { EventItem, Member, Rsvp } from "@/lib/types";
+
+export type EventWithRsvps = EventItem & {
+  rsvps: Rsvp[];
+};
+
+export async function getEventsWithRsvps(where: "upcoming" | "past" | "all" = "all") {
+  await ensureSchema();
+
+  const eventQuery =
+    where === "upcoming"
+      ? sql`SELECT * FROM events WHERE end_at >= NOW() ORDER BY start_at ASC`
+      : where === "past"
+        ? sql`SELECT * FROM events WHERE end_at < NOW() ORDER BY start_at DESC`
+        : sql`SELECT * FROM events ORDER BY start_at ASC`;
+
+  const [events, rsvps] = await Promise.all([
+    eventQuery,
+    sql`
+      SELECT rsvps.*, members.name AS member_name
+      FROM rsvps
+      INNER JOIN members ON members.id = rsvps.user_id
+      ORDER BY rsvps.updated_at DESC
+    `,
+  ]);
+
+  const grouped = new Map<string, Rsvp[]>();
+  for (const rsvp of rsvps.rows as Rsvp[]) {
+    grouped.set(rsvp.event_id, [...(grouped.get(rsvp.event_id) ?? []), rsvp]);
+  }
+
+  return (events.rows as EventItem[]).map((event) => ({ ...event, rsvps: grouped.get(event.id) ?? [] }));
+}
+
+export async function getMembers() {
+  await ensureSchema();
+  const { rows } = await sql`SELECT id, name, email, role, active, created_at FROM members ORDER BY created_at ASC`;
+  return rows as Member[];
+}
+
+export function countByStatus(rsvps: Rsvp[], status: Rsvp["status"]) {
+  return rsvps.filter((rsvp) => rsvp.status === status).length;
+}
+
+export function attendeeNames(rsvps: Rsvp[]) {
+  return rsvps.filter((rsvp) => rsvp.status === "attending").map((rsvp) => rsvp.member_name).filter(Boolean);
+}

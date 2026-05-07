@@ -454,6 +454,134 @@ button:hover,
   overflow-wrap: anywhere;
 }
 
+.history-panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+
+.history-table-wrap {
+  overflow-x: auto;
+}
+
+.history-table {
+  width: 100%;
+  min-width: 840px;
+  border-collapse: collapse;
+}
+
+.history-table th,
+.history-table td {
+  border-bottom: 1px solid var(--line);
+  padding: 12px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.history-table th {
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.history-table td {
+  color: var(--text);
+  font-size: 13px;
+}
+
+.calendar-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  margin-bottom: 14px;
+  padding: 12px;
+}
+
+.calendar-toolbar strong {
+  font-size: 18px;
+}
+
+.calendar-panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  overflow-x: auto;
+  padding: 14px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(132px, 1fr));
+  min-width: 924px;
+}
+
+.calendar-weekdays div {
+  border-bottom: 1px solid var(--line);
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0 8px 10px;
+}
+
+.calendar-day {
+  border-bottom: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  min-height: 132px;
+  padding: 8px;
+}
+
+.calendar-day:nth-child(7n) {
+  border-right: 0;
+}
+
+.calendar-day.outside {
+  opacity: 0.42;
+}
+
+.calendar-date {
+  color: var(--muted);
+  display: block;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.calendar-events {
+  display: grid;
+  gap: 6px;
+}
+
+.calendar-event {
+  border: 1px solid rgba(201, 168, 106, 0.28);
+  border-radius: 6px;
+  background: rgba(201, 168, 106, 0.1);
+  padding: 7px;
+}
+
+.calendar-event strong,
+.calendar-event span {
+  display: block;
+}
+
+.calendar-event strong {
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.calendar-event span {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+  margin-top: 3px;
+}
+
 .pill {
   min-height: 30px;
   color: var(--muted);

@@ -12,13 +12,10 @@ import { LoginForm } from "@/app/login-form";
 import { getCurrentUser } from "@/lib/auth";
 import { formatEventRange, googleCalendarUrl, toDatetimeLocalValue } from "@/lib/calendar";
 import { ensureSchema, sql } from "@/lib/db";
-import type { EventItem, Member, Rsvp, RsvpStatus } from "@/lib/types";
+import { attendeeNames, countByStatus, getEventsWithRsvps, getMembers, type EventWithRsvps } from "@/lib/events";
+import type { Member, Rsvp, RsvpStatus } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
-
-type EventWithRsvps = EventItem & {
-  rsvps: Rsvp[];
-};
 
 const statusLabels: Record<RsvpStatus, string> = {
   attending: "出席",
@@ -38,40 +35,8 @@ async function getActiveMembers() {
   return rows as Member[];
 }
 
-async function getDashboardData() {
-  await ensureSchema();
-  const [events, rsvps, members] = await Promise.all([
-    sql`SELECT * FROM events ORDER BY start_at ASC`,
-    sql`
-      SELECT rsvps.*, members.name AS member_name
-      FROM rsvps
-      INNER JOIN members ON members.id = rsvps.user_id
-      ORDER BY rsvps.updated_at DESC
-    `,
-    sql`SELECT id, name, email, role, active, created_at FROM members ORDER BY created_at ASC`,
-  ]);
-
-  const grouped = new Map<string, Rsvp[]>();
-  for (const rsvp of rsvps.rows as Rsvp[]) {
-    grouped.set(rsvp.event_id, [...(grouped.get(rsvp.event_id) ?? []), rsvp]);
-  }
-
-  return {
-    events: (events.rows as EventItem[]).map((event) => ({ ...event, rsvps: grouped.get(event.id) ?? [] })),
-    members: members.rows as Member[],
-  };
-}
-
-function countByStatus(rsvps: Rsvp[], status: RsvpStatus) {
-  return rsvps.filter((rsvp) => rsvp.status === status).length;
-}
-
 function myStatus(rsvps: Rsvp[], userId: string) {
   return rsvps.find((rsvp) => rsvp.user_id === userId)?.status;
-}
-
-function attendeeNames(rsvps: Rsvp[]) {
-  return rsvps.filter((rsvp) => rsvp.status === "attending").map((rsvp) => rsvp.member_name).filter(Boolean);
 }
 
 export default async function Home() {
@@ -93,7 +58,7 @@ export default async function Home() {
     );
   }
 
-  const { events, members } = await getDashboardData();
+  const [events, members] = await Promise.all([getEventsWithRsvps("upcoming"), getMembers()]);
 
   return (
     <main className="app-shell">
@@ -103,6 +68,12 @@ export default async function Home() {
           <h1>予定と出欠</h1>
         </div>
         <div className="user-chip">
+          <a className="ghost-button" href="/calendar">
+            カレンダー
+          </a>
+          <a className="ghost-button" href="/history">
+            過去ログ
+          </a>
           <Shield size={16} />
           <span>{user.name}</span>
           <form action={logoutAction}>
