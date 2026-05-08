@@ -9,13 +9,13 @@ import {
   updateEventAction,
 } from "@/app/actions";
 import { EventForm } from "@/app/event-form";
-import { LoginForm } from "@/app/login-form";
+import { CountdownBlock, LoginForm } from "@/app/login-form";
 import { MemberForm } from "@/app/member-form";
 import { getCurrentUser } from "@/lib/auth";
 import { formatEventRange, googleCalendarUrl, toDateTimeRangeInput } from "@/lib/calendar";
 import { ensureSchema, sql } from "@/lib/db";
 import { eventMeta, getEventsWithRsvps, getMembers, type EventWithRsvps } from "@/lib/events";
-import type { Member, Rsvp, RsvpStatus } from "@/lib/types";
+import type { EventItem, Member, Rsvp, RsvpStatus } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +35,30 @@ async function getActiveMembers() {
   `;
 
   return rows as Member[];
+}
+
+async function getNextLeagueEvent() {
+  await ensureSchema();
+  const { rows } = await sql`
+    SELECT *
+    FROM events
+    WHERE start_at >= NOW()
+      AND (
+        title = '県リーグ'
+        OR description LIKE '%"type":"league"%'
+        OR description LIKE '%"type": "league"%'
+      )
+    ORDER BY start_at ASC
+    LIMIT 1
+  `;
+
+  return (rows[0] as EventItem | undefined) ?? null;
+}
+
+function daysUntil(startAt: string) {
+  const diff = new Date(startAt).getTime() - Date.now();
+  const days = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  return days === 0 ? "今日" : `${days}日`;
 }
 
 function myStatus(rsvps: Rsvp[], userId: string) {
@@ -72,15 +96,26 @@ export default async function Home() {
   const user = await getCurrentUser();
 
   if (!user) {
-    const members = await getActiveMembers();
+    const [members, nextLeagueEvent] = await Promise.all([getActiveMembers(), getNextLeagueEvent()]);
+    const nextLeagueMeta = nextLeagueEvent ? eventMeta(nextLeagueEvent) : null;
+    const leagueCountdown = nextLeagueEvent
+      ? {
+          daysLabel: daysUntil(nextLeagueEvent.start_at),
+          dateLabel: formatEventRange(nextLeagueEvent.start_at, nextLeagueEvent.end_at),
+          location: nextLeagueEvent.location ?? "",
+          opponent: nextLeagueMeta?.opponent ?? "",
+        }
+      : null;
+
     return (
       <main className="auth-screen">
         <section className="auth-visual">
           <div className="orbital-panel">
             <img src="/gens-emblem.png" alt="GENS ICHIHARA" />
           </div>
+          <CountdownBlock leagueCountdown={leagueCountdown} />
         </section>
-        <LoginForm members={members} />
+        <LoginForm members={members} leagueCountdown={leagueCountdown} />
       </main>
     );
   }

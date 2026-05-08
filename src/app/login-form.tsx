@@ -5,11 +5,22 @@ import { LogIn } from "lucide-react";
 import { loginAction } from "@/app/actions";
 import type { Member } from "@/lib/types";
 
-export function LoginForm({ members }: { members: Pick<Member, "id" | "name">[] }) {
+type LeagueCountdown = {
+  daysLabel: string;
+  dateLabel: string;
+  location: string;
+  opponent: string;
+} | null;
+
+export function LoginForm({ members, leagueCountdown }: { members: Pick<Member, "id" | "name">[]; leagueCountdown: LeagueCountdown }) {
   const [state, action, pending] = useActionState(loginAction, { ok: false, message: "" });
 
   return (
     <form action={action} className="login-panel">
+      <div className="login-countdown-mobile">
+        <CountdownBlock leagueCountdown={leagueCountdown} />
+      </div>
+
       <div>
         <p className="eyebrow">Schedule / RSVP</p>
         <h1>GENS Schedule Board</h1>
@@ -38,5 +49,25 @@ export function LoginForm({ members }: { members: Pick<Member, "id" | "name">[] 
         {pending ? "確認中" : "入室"}
       </button>
     </form>
+  );
+}
+
+export function CountdownBlock({ leagueCountdown }: { leagueCountdown: LeagueCountdown }) {
+  return (
+    <div className="countdown-card">
+      <p className="eyebrow">Next League Match</p>
+      <span className="countdown-kicker">公式戦（県リーグ）まで</span>
+      <strong>{leagueCountdown ? `あと ${leagueCountdown.daysLabel}！` : "準備中"}</strong>
+      {leagueCountdown ? (
+        <div className="countdown-details">
+          <span>{leagueCountdown.dateLabel}</span>
+          {leagueCountdown.opponent ? <span>vs {leagueCountdown.opponent}</span> : null}
+          {leagueCountdown.location ? <span>{leagueCountdown.location}</span> : null}
+        </div>
+      ) : (
+        <p>次の県リーグ予定を登録すると、ここにカウントダウンが表示されます。</p>
+      )}
+      <p className="countdown-message">出欠も、気持ちも、前倒しで整えていこう。</p>
+    </div>
   );
 }

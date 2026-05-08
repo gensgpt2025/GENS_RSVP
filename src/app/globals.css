@@ -51,21 +51,26 @@ a {
 }
 
 .auth-visual {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
+  gap: 28px;
   padding: 48px;
   background:
-    radial-gradient(circle at center, rgba(201, 168, 106, 0.16), transparent 36%),
-    linear-gradient(135deg, rgba(201, 168, 106, 0.1), transparent 42%),
+    radial-gradient(circle at 50% 26%, rgba(201, 168, 106, 0.18), transparent 28%),
+    linear-gradient(150deg, rgba(201, 168, 106, 0.12), transparent 42%),
     #050608;
+  overflow: hidden;
 }
 
 .orbital-panel {
-  width: min(520px, 72vw);
+  width: min(300px, 48vw);
   display: flex;
   align-items: center;
   justify-content: center;
+  opacity: 0.94;
 }
 
 .orbital-panel img {
@@ -73,6 +78,63 @@ a {
   height: auto;
   display: block;
   filter: drop-shadow(0 28px 44px rgba(0, 0, 0, 0.54));
+}
+
+.countdown-card {
+  width: min(620px, 100%);
+  border: 1px solid rgba(201, 168, 106, 0.28);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(18, 20, 26, 0.84), rgba(8, 9, 12, 0.88));
+  box-shadow: var(--shadow);
+  padding: 26px;
+  text-align: center;
+}
+
+.countdown-kicker {
+  display: block;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.countdown-card strong {
+  display: block;
+  color: var(--gold);
+  font-size: clamp(44px, 8vw, 82px);
+  line-height: 1;
+  margin-bottom: 18px;
+}
+
+.countdown-details {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.countdown-details span {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--text);
+  font-size: 13px;
+  padding: 8px 12px;
+}
+
+.countdown-card p {
+  color: var(--muted);
+  line-height: 1.7;
+  margin-bottom: 0;
+}
+
+.countdown-message {
+  font-weight: 700;
+}
+
+.login-countdown-mobile {
+  display: none;
 }
 
 .muted,
@@ -655,6 +717,22 @@ button:hover,
   .auth-visual,
   .login-panel {
     padding: 24px;
+  }
+
+  .auth-visual {
+    display: none;
+  }
+
+  .login-countdown-mobile {
+    display: block;
+  }
+
+  .login-countdown-mobile .countdown-card {
+    padding: 18px;
+  }
+
+  .countdown-card strong {
+    font-size: 46px;
   }
 
   .admin-auth-grid {

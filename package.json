@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "cleanup:target-data": "node scripts/delete-target-data.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.9.5",
