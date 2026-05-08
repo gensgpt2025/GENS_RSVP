@@ -7,6 +7,7 @@ import type { Member } from "@/lib/types";
 
 type LeagueCountdown = {
   daysLabel: string;
+  isSoon: boolean;
   dateLabel: string;
   location: string;
   opponent: string;
@@ -57,17 +58,19 @@ export function CountdownBlock({ leagueCountdown }: { leagueCountdown: LeagueCou
     <div className="countdown-card">
       <p className="eyebrow">Next League Match</p>
       <span className="countdown-kicker">公式戦（県リーグ）まで</span>
-      <strong>{leagueCountdown ? `あと ${leagueCountdown.daysLabel}！` : "準備中"}</strong>
-      {leagueCountdown ? (
+      <strong>{leagueCountdown?.isSoon ? `あと ${leagueCountdown.daysLabel}！` : "次の公式戦まで良い準備をしよう!!"}</strong>
+      {leagueCountdown?.isSoon ? (
         <div className="countdown-details">
           <span>{leagueCountdown.dateLabel}</span>
           {leagueCountdown.opponent ? <span>vs {leagueCountdown.opponent}</span> : null}
           {leagueCountdown.location ? <span>{leagueCountdown.location}</span> : null}
         </div>
-      ) : (
-        <p>次の県リーグ予定を登録すると、ここにカウントダウンが表示されます。</p>
-      )}
-      <p className="countdown-message">出欠も、気持ちも、前倒しで整えていこう。</p>
+      ) : null}
+      <p className="countdown-message">
+        Switch Zero, Fight Hard.
+        <br />
+        - 0秒切替･最強球際 -
+      </p>
     </div>
   );
 }

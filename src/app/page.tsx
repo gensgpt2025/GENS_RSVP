@@ -58,7 +58,10 @@ async function getNextLeagueEvent() {
 function daysUntil(startAt: string) {
   const diff = new Date(startAt).getTime() - Date.now();
   const days = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-  return days === 0 ? "今日" : `${days}日`;
+  return {
+    days,
+    label: days === 0 ? "今日" : `${days}日`,
+  };
 }
 
 function myStatus(rsvps: Rsvp[], userId: string) {
@@ -98,9 +101,11 @@ export default async function Home() {
   if (!user) {
     const [members, nextLeagueEvent] = await Promise.all([getActiveMembers(), getNextLeagueEvent()]);
     const nextLeagueMeta = nextLeagueEvent ? eventMeta(nextLeagueEvent) : null;
+    const leagueDays = nextLeagueEvent ? daysUntil(nextLeagueEvent.start_at) : null;
     const leagueCountdown = nextLeagueEvent
       ? {
-          daysLabel: daysUntil(nextLeagueEvent.start_at),
+          daysLabel: leagueDays?.label ?? "",
+          isSoon: (leagueDays?.days ?? 999) <= 60,
           dateLabel: formatEventRange(nextLeagueEvent.start_at, nextLeagueEvent.end_at),
           location: nextLeagueEvent.location ?? "",
           opponent: nextLeagueMeta?.opponent ?? "",
