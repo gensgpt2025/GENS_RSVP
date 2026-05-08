@@ -11,9 +11,9 @@ export function LoginForm({ members }: { members: Pick<Member, "id" | "name">[] 
   return (
     <form action={action} className="login-panel">
       <div>
-        <p className="eyebrow">Private Schedule</p>
-        <h1>GENS Schedule</h1>
-        <p className="muted">登録済みメンバーを選ぶだけで予定と出欠を確認できます。</p>
+        <p className="eyebrow">Schedule / RSVP</p>
+        <h1>GENS Schedule Board</h1>
+        <p className="muted">メンバー名を選択して入室してください</p>
       </div>
 
       <label>

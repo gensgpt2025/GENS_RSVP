@@ -78,8 +78,8 @@ export default async function Home() {
     <main className="app-shell">
       <header className="topbar">
         <div>
-          <p className="eyebrow">GENS Schedule</p>
-          <h1>予定と出欠</h1>
+          <p className="eyebrow">Schedule / RSVP</p>
+          <h1>GENS Schedule Board</h1>
         </div>
         <div className="user-chip">
           <a className="ghost-button" href="/calendar">
