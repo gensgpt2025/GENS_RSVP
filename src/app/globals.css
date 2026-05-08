@@ -52,38 +52,30 @@ a {
 
 .auth-visual {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
+  justify-content: center;
   padding: 48px;
   background:
-    linear-gradient(rgba(9, 10, 13, 0.1), rgba(9, 10, 13, 0.82)),
-    url("https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1600&q=80") center/cover;
+    radial-gradient(circle at center, rgba(201, 168, 106, 0.16), transparent 36%),
+    linear-gradient(135deg, rgba(201, 168, 106, 0.1), transparent 42%),
+    #050608;
 }
 
 .orbital-panel {
-  width: min(520px, 100%);
-  border: 1px solid var(--line);
-  background: rgba(10, 12, 16, 0.64);
-  padding: 24px;
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(18px);
+  width: min(520px, 72vw);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.orbital-panel span {
+.orbital-panel img {
+  width: 100%;
+  height: auto;
   display: block;
-  width: 42px;
-  height: 2px;
-  background: var(--gold);
-  margin-bottom: 16px;
-}
-
-.orbital-panel strong {
-  display: block;
-  font-size: 34px;
-  margin-bottom: 8px;
+  filter: drop-shadow(0 28px 44px rgba(0, 0, 0, 0.54));
 }
 
 .muted,
-.orbital-panel p,
 .event-description,
 .empty-state {
   color: var(--muted);
@@ -374,24 +366,34 @@ button:hover,
   color: var(--gold);
 }
 
-.attendee-box {
+.response-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.response-tab {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.035);
-  margin-bottom: 12px;
   padding: 12px;
+  min-width: 0;
 }
 
-.attendee-box strong {
+.response-tab strong {
   display: block;
   color: var(--gold);
   font-size: 13px;
   margin-bottom: 6px;
 }
 
-.attendee-box p {
+.response-tab p {
   color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
   margin-bottom: 0;
+  overflow-wrap: anywhere;
 }
 
 .edit-event-panel {
@@ -644,6 +646,10 @@ button:hover,
   .calendar-actions,
   .rsvp-form {
     justify-content: flex-start;
+  }
+
+  .response-tabs {
+    grid-template-columns: 1fr;
   }
 
   .auth-visual,

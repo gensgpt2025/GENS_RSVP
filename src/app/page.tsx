@@ -14,14 +14,14 @@ import { MemberForm } from "@/app/member-form";
 import { getCurrentUser } from "@/lib/auth";
 import { formatEventRange, googleCalendarUrl, toDateTimeRangeInput } from "@/lib/calendar";
 import { ensureSchema, sql } from "@/lib/db";
-import { attendeeNames, countByStatus, eventMeta, getEventsWithRsvps, getMembers, type EventWithRsvps } from "@/lib/events";
+import { eventMeta, getEventsWithRsvps, getMembers, type EventWithRsvps } from "@/lib/events";
 import type { Member, Rsvp, RsvpStatus } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 const statusLabels: Record<RsvpStatus, string> = {
-  attending: "出席",
-  declined: "欠席",
+  attending: "参加",
+  declined: "不参加",
   maybe: "未定",
 };
 
@@ -39,6 +39,20 @@ async function getActiveMembers() {
 
 function myStatus(rsvps: Rsvp[], userId: string) {
   return rsvps.find((rsvp) => rsvp.user_id === userId)?.status;
+}
+
+function memberNamesByStatus(rsvps: Rsvp[], members: Member[], status: RsvpStatus) {
+  const rsvpByUser = new Map(rsvps.map((rsvp) => [rsvp.user_id, rsvp]));
+
+  return members
+    .filter((member) => {
+      const memberStatus = rsvpByUser.get(member.id)?.status;
+      if (status === "maybe") {
+        return !memberStatus || memberStatus === "maybe";
+      }
+      return memberStatus === status;
+    })
+    .map((member) => member.name);
 }
 
 function eventFormDefaults(event: EventWithRsvps) {
@@ -63,9 +77,7 @@ export default async function Home() {
       <main className="auth-screen">
         <section className="auth-visual">
           <div className="orbital-panel">
-            <span />
-            <strong>Persistent</strong>
-            <p>予定と出欠はデータベースに保存され、端末やブラウザを変えても同じ情報を共有できます。</p>
+            <img src="/gens-emblem.png" alt="GENS ICHIHARA" />
           </div>
         </section>
         <LoginForm members={members} />
@@ -125,7 +137,9 @@ export default async function Home() {
             {events.length === 0 ? <p className="empty-state">まだ予定はありません。</p> : null}
             {events.map((event: EventWithRsvps) => {
               const currentStatus = myStatus(event.rsvps, user.id);
-              const attendees = attendeeNames(event.rsvps);
+              const attendingMembers = memberNamesByStatus(event.rsvps, members, "attending");
+              const declinedMembers = memberNamesByStatus(event.rsvps, members, "declined");
+              const maybeMembers = memberNamesByStatus(event.rsvps, members, "maybe");
               const meta = eventMeta(event);
               const showOpponent = (meta.type === "match" || meta.type === "league") && meta.opponent;
               return (
@@ -164,14 +178,24 @@ export default async function Home() {
                   </div>
 
                   <div className="status-row">
-                    <span>出席 {countByStatus(event.rsvps, "attending")}</span>
-                    <span>欠席 {countByStatus(event.rsvps, "declined")}</span>
-                    <span>未定 {countByStatus(event.rsvps, "maybe")}</span>
+                    <span>参加 {attendingMembers.length}</span>
+                    <span>不参加 {declinedMembers.length}</span>
+                    <span>未定 {maybeMembers.length}</span>
                   </div>
 
-                  <div className="attendee-box">
-                    <strong>出席メンバー</strong>
-                    <p>{attendees.length > 0 ? attendees.join("、") : "まだ出席回答はありません。"}</p>
+                  <div className="response-tabs">
+                    <div className="response-tab">
+                      <strong>参加</strong>
+                      <p>{attendingMembers.length > 0 ? attendingMembers.join("、") : "まだ参加回答はありません。"}</p>
+                    </div>
+                    <div className="response-tab">
+                      <strong>不参加</strong>
+                      <p>{declinedMembers.length > 0 ? declinedMembers.join("、") : "まだ不参加回答はありません。"}</p>
+                    </div>
+                    <div className="response-tab">
+                      <strong>未定</strong>
+                      <p>{maybeMembers.length > 0 ? maybeMembers.join("、") : "未定メンバーはいません。"}</p>
+                    </div>
                   </div>
 
                   <form action={rsvpAction} className="rsvp-form">
