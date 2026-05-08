@@ -8,12 +8,34 @@ function escapeIcs(value: string) {
   return value.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
 }
 
+function displayDescription(event: EventItem) {
+  if (!event.description) return "";
+
+  try {
+    const parsed = JSON.parse(event.description) as { notes?: string; type?: string; opponent?: string };
+    const lines = [];
+    const showOpponent = (parsed.type === "match" || parsed.type === "league") && parsed.opponent;
+
+    if (showOpponent) {
+      lines.push(`対戦相手: ${parsed.opponent}`);
+    }
+
+    if (parsed.notes) {
+      lines.push(parsed.notes);
+    }
+
+    return lines.join("\n");
+  } catch {
+    return event.description;
+  }
+}
+
 export function googleCalendarUrl(event: EventItem) {
   const params = new URLSearchParams({
     action: "TEMPLATE",
     text: event.title,
     dates: `${toCalendarDate(event.start_at)}/${toCalendarDate(event.end_at)}`,
-    details: event.description ?? "",
+    details: displayDescription(event),
     location: event.location ?? "",
   });
 
@@ -34,7 +56,7 @@ export function icsForEvent(event: EventItem) {
     `DTSTART:${toCalendarDate(event.start_at)}`,
     `DTEND:${toCalendarDate(event.end_at)}`,
     `SUMMARY:${escapeIcs(event.title)}`,
-    `DESCRIPTION:${escapeIcs(event.description ?? "")}`,
+    `DESCRIPTION:${escapeIcs(displayDescription(event))}`,
     `LOCATION:${escapeIcs(event.location ?? "")}`,
     "END:VEVENT",
     "END:VCALENDAR",

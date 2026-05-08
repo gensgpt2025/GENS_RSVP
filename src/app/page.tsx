@@ -14,7 +14,7 @@ import { MemberForm } from "@/app/member-form";
 import { getCurrentUser } from "@/lib/auth";
 import { formatEventRange, googleCalendarUrl, toDateTimeRangeInput } from "@/lib/calendar";
 import { ensureSchema, sql } from "@/lib/db";
-import { attendeeNames, countByStatus, getEventsWithRsvps, getMembers, type EventWithRsvps } from "@/lib/events";
+import { attendeeNames, countByStatus, eventMeta, getEventsWithRsvps, getMembers, type EventWithRsvps } from "@/lib/events";
 import type { Member, Rsvp, RsvpStatus } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -42,14 +42,15 @@ function myStatus(rsvps: Rsvp[], userId: string) {
 }
 
 function eventFormDefaults(event: EventWithRsvps) {
+  const meta = eventMeta(event);
   const match = event.title.match(/^(練習試合|県リーグ)\s+vs\s+(.+)$/);
   return {
     id: event.id,
     category: match ? match[1] : event.title === "県リーグ" || event.title === "練習試合" || event.title === "トレーニング" ? event.title : "トレーニング",
-    opponent: match?.[2] ?? "",
+    opponent: match?.[2] ?? meta.opponent,
     datetimeRange: toDateTimeRangeInput(event.start_at, event.end_at),
     location: event.location ?? "",
-    description: event.description ?? "",
+    description: meta.notes,
   };
 }
 
@@ -125,6 +126,8 @@ export default async function Home() {
             {events.map((event: EventWithRsvps) => {
               const currentStatus = myStatus(event.rsvps, user.id);
               const attendees = attendeeNames(event.rsvps);
+              const meta = eventMeta(event);
+              const showOpponent = (meta.type === "match" || meta.type === "league") && meta.opponent;
               return (
                 <article className="event-card" key={event.id}>
                   <div className="event-main">
@@ -140,7 +143,13 @@ export default async function Home() {
                           {event.location}
                         </p>
                       ) : null}
-                      {event.description ? <p className="event-description">{event.description}</p> : null}
+                      {showOpponent ? (
+                        <p className="event-time">
+                          <Shield size={16} />
+                          対戦相手: {meta.opponent}
+                        </p>
+                      ) : null}
+                      {meta.notes ? <p className="event-description">{meta.notes}</p> : null}
                     </div>
                     <div className="calendar-actions">
                       <a className="icon-link" href={googleCalendarUrl(event)} target="_blank" rel="noreferrer">
