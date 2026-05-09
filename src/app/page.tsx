@@ -44,7 +44,7 @@ async function getNextLeagueEvent() {
     FROM events
     WHERE start_at >= NOW()
       AND (
-        title = '県リーグ'
+        title LIKE '県リーグ%'
         OR description LIKE '%"type":"league"%'
         OR description LIKE '%"type": "league"%'
       )
@@ -56,8 +56,18 @@ async function getNextLeagueEvent() {
 }
 
 function daysUntil(startAt: string) {
-  const diff = new Date(startAt).getTime() - Date.now();
-  const days = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  const dateParts = (value: Date) => {
+    const parts = new Intl.DateTimeFormat("ja-JP", {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      timeZone: "Asia/Tokyo",
+    }).formatToParts(value);
+    const values = Object.fromEntries(parts.map((part) => [part.type, Number(part.value)]));
+    return Date.UTC(values.year, values.month - 1, values.day);
+  };
+  const diff = dateParts(new Date(startAt)) - dateParts(new Date());
+  const days = Math.max(0, Math.round(diff / (1000 * 60 * 60 * 24)));
   return {
     days,
     label: days === 0 ? "今日" : `${days}日`,
