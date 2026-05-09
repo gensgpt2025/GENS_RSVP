@@ -38,6 +38,7 @@ export async function getMembers() {
   const { rows } = await sql`
     SELECT id, name, email, role, active, created_at
     FROM members
+    WHERE active = TRUE
     ORDER BY
       CASE WHEN name ~ '^[0-9]+' THEN 0 ELSE 1 END,
       CASE WHEN name ~ '^[0-9]+' THEN substring(name from '^[0-9]+')::int ELSE NULL END ASC,
