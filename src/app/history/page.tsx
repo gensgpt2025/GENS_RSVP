@@ -2,7 +2,7 @@ import { ArrowLeft, Shield } from "lucide-react";
 import { logoutAction } from "@/app/actions";
 import { getCurrentUser } from "@/lib/auth";
 import { formatEventRange } from "@/lib/calendar";
-import { attendeeNames, countByStatus, getEventsWithRsvps } from "@/lib/events";
+import { attendeeNames, countByStatus, eventDisplayTitle, getEventsWithRsvps } from "@/lib/events";
 
 export const dynamic = "force-dynamic";
 
@@ -72,7 +72,7 @@ export default async function HistoryPage() {
                   return (
                     <tr key={event.id}>
                       <td>{formatEventRange(event.start_at, event.end_at)}</td>
-                      <td>{event.title}</td>
+                      <td>{eventDisplayTitle(event)}</td>
                       <td>{event.location || "-"}</td>
                       <td>{attendees.length > 0 ? attendees.join("、") : "-"}</td>
                       <td>{countByStatus(event.rsvps, "attending")}</td>

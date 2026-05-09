@@ -14,7 +14,7 @@ import { MemberForm } from "@/app/member-form";
 import { getCurrentUser } from "@/lib/auth";
 import { formatEventRange, googleCalendarUrl, toDateTimeRangeInput } from "@/lib/calendar";
 import { ensureSchema, sql } from "@/lib/db";
-import { eventMeta, getEventsWithRsvps, getMembers, type EventWithRsvps } from "@/lib/events";
+import { eventDisplayTitle, eventMeta, getEventsWithRsvps, getMembers, type EventWithRsvps } from "@/lib/events";
 import type { EventItem, Member, Rsvp, RsvpStatus } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -203,7 +203,7 @@ export default async function Home() {
                 <article className="event-card" key={event.id}>
                   <div className="event-main">
                     <div>
-                      <h3>{event.title}</h3>
+                      <h3>{eventDisplayTitle(event)}</h3>
                       <p className="event-time">
                         <Clock size={16} />
                         {formatEventRange(event.start_at, event.end_at)}
