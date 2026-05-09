@@ -74,6 +74,12 @@ function daysUntil(startAt: string) {
   };
 }
 
+function opponentFromEvent(event: EventItem, metaOpponent: string) {
+  if (metaOpponent) return metaOpponent;
+  const match = event.title.match(/^県リーグ\s+vs\s+(.+)$/);
+  return match?.[1]?.trim() ?? "";
+}
+
 function myStatus(rsvps: Rsvp[], userId: string) {
   return rsvps.find((rsvp) => rsvp.user_id === userId)?.status;
 }
@@ -112,13 +118,14 @@ export default async function Home() {
     const [members, nextLeagueEvent] = await Promise.all([getActiveMembers(), getNextLeagueEvent()]);
     const nextLeagueMeta = nextLeagueEvent ? eventMeta(nextLeagueEvent) : null;
     const leagueDays = nextLeagueEvent ? daysUntil(nextLeagueEvent.start_at) : null;
+    const leagueOpponent = nextLeagueEvent ? opponentFromEvent(nextLeagueEvent, nextLeagueMeta?.opponent ?? "") : "";
     const leagueCountdown = nextLeagueEvent
       ? {
           daysLabel: leagueDays?.label ?? "",
           isSoon: (leagueDays?.days ?? 999) <= 60,
           dateLabel: formatEventRange(nextLeagueEvent.start_at, nextLeagueEvent.end_at),
           location: nextLeagueEvent.location ?? "",
-          opponent: nextLeagueMeta?.opponent ?? "",
+          opponent: leagueOpponent,
         }
       : null;
 

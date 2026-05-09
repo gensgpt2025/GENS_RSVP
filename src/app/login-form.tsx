@@ -58,7 +58,7 @@ export function CountdownBlock({ leagueCountdown }: { leagueCountdown: LeagueCou
     <div className="countdown-card">
       <p className="eyebrow">Next League Match</p>
       <span className="countdown-kicker">公式戦（県リーグ）まで</span>
-      <strong>{leagueCountdown?.isSoon ? `あと ${leagueCountdown.daysLabel}！` : "次の公式戦まで良い準備をしよう!!"}</strong>
+      <strong>{leagueCountdown?.isSoon ? `あと ${leagueCountdown.daysLabel}！` : "積み上げよう！"}</strong>
       {leagueCountdown?.isSoon ? (
         <div className="countdown-details">
           <span>{leagueCountdown.dateLabel}</span>
