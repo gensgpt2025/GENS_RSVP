@@ -9,8 +9,10 @@ import {
   updateEventAction,
 } from "@/app/actions";
 import { EventForm } from "@/app/event-form";
+import { EventDeleteForm } from "@/app/event-delete-form";
 import { CountdownBlock, LoginForm } from "@/app/login-form";
 import { MemberForm } from "@/app/member-form";
+import { SheetSyncForm } from "@/app/sheet-sync-form";
 import { getCurrentUser } from "@/lib/auth";
 import { formatEventRange, googleCalendarUrl, toDateTimeRangeInput } from "@/lib/calendar";
 import { ensureSchema, sql } from "@/lib/db";
@@ -199,11 +201,12 @@ export default async function Home() {
               const maybeMembers = memberNamesByStatus(event.rsvps, members, "maybe");
               const meta = eventMeta(event);
               const showOpponent = (meta.type === "match" || meta.type === "league") && meta.opponent;
+              const displayTitle = eventDisplayTitle(event);
               return (
                 <article className="event-card" key={event.id}>
                   <div className="event-main">
                     <div>
-                      <h3>{eventDisplayTitle(event)}</h3>
+                      <h3>{displayTitle}</h3>
                       <p className="event-time">
                         <Clock size={16} />
                         {formatEventRange(event.start_at, event.end_at)}
@@ -270,12 +273,7 @@ export default async function Home() {
                     <EventForm action={updateEventAction} buttonLabel="修正を保存" defaults={eventFormDefaults(event)} />
                   </details>
 
-                  <form action={deleteEventAction} className="admin-inline-form">
-                    <input type="hidden" name="event_id" value={event.id} />
-                    <button className="danger-button" type="submit">
-                      イベント削除
-                    </button>
-                  </form>
+                  <EventDeleteForm action={deleteEventAction} eventId={event.id} eventTitle={displayTitle} />
                 </article>
               );
             })}
@@ -290,11 +288,7 @@ export default async function Home() {
                 <h2>イベント追加</h2>
               </div>
             </div>
-            <form action={syncSheetEventsAction} className="sync-form">
-              <button className="secondary-button" type="submit">
-                スプレッドシート同期
-              </button>
-            </form>
+            <SheetSyncForm action={syncSheetEventsAction} />
             <EventForm action={createEventAction} buttonLabel="追加" />
           </section>
 
