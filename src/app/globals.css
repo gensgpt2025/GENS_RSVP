@@ -649,6 +649,10 @@ button:hover,
   display: block;
 }
 
+.calendar-event .calendar-event-mobile {
+  display: none;
+}
+
 .calendar-event strong {
   font-size: 12px;
   line-height: 1.35;
@@ -659,6 +663,40 @@ button:hover,
   font-size: 11px;
   line-height: 1.5;
   margin-top: 3px;
+}
+
+.mobile-month-list {
+  display: none;
+}
+
+.mobile-event-list {
+  display: grid;
+  gap: 10px;
+}
+
+.mobile-event-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 14px;
+}
+
+.mobile-event-card strong,
+.mobile-event-card span {
+  display: block;
+}
+
+.mobile-event-card strong {
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.45;
+  margin-bottom: 8px;
+}
+
+.mobile-event-card span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
 }
 
 .pill {
@@ -756,34 +794,77 @@ button:hover,
   }
 
   .calendar-day {
-    min-height: 62px;
-    padding: 3px;
+    min-height: 78px;
+    padding: 4px 3px;
   }
 
   .calendar-date {
-    font-size: 10px;
-    margin-bottom: 3px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 5px;
+    text-align: center;
   }
 
   .calendar-events {
-    gap: 2px;
+    display: grid;
+    gap: 3px;
+    min-height: 0;
   }
 
   .calendar-event {
+    width: 100%;
+    height: auto;
     border-radius: 4px;
-    padding: 3px;
+    padding: 3px 2px;
+    overflow: hidden;
   }
 
-  .calendar-event strong {
-    font-size: 9px;
-    line-height: 1.2;
+  .calendar-event-title,
+  .calendar-event-meta {
+    display: none;
+  }
+
+  .calendar-event .calendar-event-mobile {
+    display: block;
+    color: var(--text);
+    line-height: 1.15;
+    margin: 0;
+    min-width: 0;
+  }
+
+  .calendar-event-mobile b,
+  .calendar-event-mobile em {
+    display: block;
+    font-style: normal;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .calendar-event span {
-    display: none;
+  .calendar-event-mobile b {
+    font-size: 8px;
+    font-weight: 800;
+  }
+
+  .calendar-event-mobile em {
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 8px;
+    margin-top: 1px;
+  }
+
+  .calendar-event-league {
+    border-color: rgba(111, 207, 151, 0.48);
+    background: rgba(111, 207, 151, 0.22);
+  }
+
+  .calendar-event-training {
+    border-color: rgba(214, 164, 92, 0.5);
+    background: rgba(214, 164, 92, 0.24);
+  }
+
+  .calendar-event-match {
+    border-color: rgba(122, 167, 255, 0.52);
+    background: rgba(122, 167, 255, 0.22);
   }
 
   .calendar-toolbar {
@@ -798,5 +879,10 @@ button:hover,
   .calendar-toolbar .ghost-button {
     min-height: 34px;
     padding: 0 8px;
+  }
+
+  .mobile-month-list {
+    display: block;
+    margin-top: 16px;
   }
 }

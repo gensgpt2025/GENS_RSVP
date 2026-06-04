@@ -38,6 +38,40 @@ function eventDateKey(value: string) {
   return `${map.year}-${map.month}-${map.day}`;
 }
 
+function eventMonthKey(value: string) {
+  return eventDateKey(value).slice(0, 7);
+}
+
+function eventStartTime(value: string) {
+  const parts = new Intl.DateTimeFormat("ja-JP", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Tokyo",
+  }).formatToParts(new Date(value));
+  const map = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${map.hour}:${map.minute}`;
+}
+
+function opponentFromTitle(title: string) {
+  return title.match(/^(練習試合|県リーグ)\s+vs\s+(.+)$/i)?.[2]?.trim() ?? "";
+}
+
+function calendarEventSummary(event: { title: string; description: string | null; start_at: string }) {
+  const meta = eventMeta(event);
+  const opponent = meta.opponent || opponentFromTitle(event.title);
+
+  if (meta.type === "league" || event.title.startsWith("県リーグ")) {
+    return { kind: "league", label: "リーグ戦", detail: opponent };
+  }
+
+  if (meta.type === "match" || event.title.startsWith("練習試合")) {
+    return { kind: "match", label: "練習試合", detail: opponent };
+  }
+
+  return { kind: "training", label: "トレーニング", detail: eventStartTime(event.start_at) };
+}
+
 function buildCalendarDays(month: Date) {
   const first = new Date(month.getFullYear(), month.getMonth(), 1);
   const start = new Date(first);
@@ -82,6 +116,8 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
 
   const days = buildCalendarDays(month);
   const title = `${month.getFullYear()}年${month.getMonth() + 1}月`;
+  const currentMonthKey = monthKey(month);
+  const monthEvents = events.filter((event) => eventMonthKey(event.start_at) === currentMonthKey);
 
   return (
     <main className="app-shell">
@@ -136,12 +172,17 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
                   {dayEvents.map((event) => {
                     const meta = eventMeta(event);
                     const showOpponent = (meta.type === "match" || meta.type === "league") && meta.opponent;
+                    const summary = calendarEventSummary(event);
                     return (
-                      <div className="calendar-event" key={event.id}>
-                        <strong>{eventDisplayTitle(event)}</strong>
-                        <span>{formatEventRange(event.start_at, event.end_at)}</span>
-                        {event.location ? <span>{event.location}</span> : null}
-                        {showOpponent ? <span>対戦相手: {meta.opponent}</span> : null}
+                      <div className={`calendar-event calendar-event-${summary.kind}`} key={event.id}>
+                        <strong className="calendar-event-title">{eventDisplayTitle(event)}</strong>
+                        <span className="calendar-event-mobile">
+                          <b>{summary.label}</b>
+                          {summary.detail ? <em>{summary.detail}</em> : null}
+                        </span>
+                        <span className="calendar-event-meta">{formatEventRange(event.start_at, event.end_at)}</span>
+                        {event.location ? <span className="calendar-event-meta">{event.location}</span> : null}
+                        {showOpponent ? <span className="calendar-event-meta">対戦相手: {meta.opponent}</span> : null}
                       </div>
                     );
                   })}
@@ -150,6 +191,33 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
             );
           })}
         </div>
+      </section>
+
+      <section className="mobile-month-list">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Monthly Events</p>
+            <h2>今月の予定</h2>
+          </div>
+        </div>
+        {monthEvents.length === 0 ? (
+          <p className="empty-state">今月の予定はありません。</p>
+        ) : (
+          <div className="mobile-event-list">
+            {monthEvents.map((event) => {
+              const meta = eventMeta(event);
+              const showOpponent = (meta.type === "match" || meta.type === "league") && meta.opponent;
+              return (
+                <article className="mobile-event-card" key={event.id}>
+                  <strong>{eventDisplayTitle(event)}</strong>
+                  <span>{formatEventRange(event.start_at, event.end_at)}</span>
+                  {event.location ? <span>{event.location}</span> : null}
+                  {showOpponent ? <span>対戦相手: {meta.opponent}</span> : null}
+                </article>
+              );
+            })}
+          </div>
+        )}
       </section>
     </main>
   );
