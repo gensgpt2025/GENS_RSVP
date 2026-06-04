@@ -644,6 +644,24 @@ button:hover,
   padding: 7px;
 }
 
+.calendar-event-league {
+  border-color: rgba(111, 207, 151, 0.5);
+  background: linear-gradient(135deg, rgba(111, 207, 151, 0.24), rgba(111, 207, 151, 0.1));
+  box-shadow: inset 3px 0 0 rgba(111, 207, 151, 0.92);
+}
+
+.calendar-event-training {
+  border-color: rgba(214, 164, 92, 0.52);
+  background: linear-gradient(135deg, rgba(214, 164, 92, 0.24), rgba(214, 164, 92, 0.1));
+  box-shadow: inset 3px 0 0 rgba(214, 164, 92, 0.94);
+}
+
+.calendar-event-match {
+  border-color: rgba(122, 167, 255, 0.55);
+  background: linear-gradient(135deg, rgba(122, 167, 255, 0.25), rgba(122, 167, 255, 0.1));
+  box-shadow: inset 3px 0 0 rgba(122, 167, 255, 0.94);
+}
+
 .calendar-event strong,
 .calendar-event span {
   display: block;
