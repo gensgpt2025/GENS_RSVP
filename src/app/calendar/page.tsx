@@ -62,14 +62,14 @@ function calendarEventSummary(event: { title: string; description: string | null
   const opponent = meta.opponent || opponentFromTitle(event.title);
 
   if (meta.type === "league" || event.title.startsWith("県リーグ")) {
-    return { kind: "league", label: "リーグ戦", detail: opponent };
+    return { kind: "league", label: "リーグ戦", detail: opponent, badge: "試合" };
   }
 
   if (meta.type === "match" || event.title.startsWith("練習試合")) {
-    return { kind: "match", label: "練習試合", detail: opponent };
+    return { kind: "match", label: "練習試合", detail: opponent, badge: "試合" };
   }
 
-  return { kind: "training", label: "トレーニング", detail: eventStartTime(event.start_at) };
+  return { kind: "training", label: "トレーニング", detail: eventStartTime(event.start_at), badge: "練習" };
 }
 
 function buildCalendarDays(month: Date) {
@@ -207,12 +207,18 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
             {monthEvents.map((event) => {
               const meta = eventMeta(event);
               const showOpponent = (meta.type === "match" || meta.type === "league") && meta.opponent;
+              const summary = calendarEventSummary(event);
               return (
-                <article className="mobile-event-card" key={event.id}>
-                  <strong>{eventDisplayTitle(event)}</strong>
-                  <span>{formatEventRange(event.start_at, event.end_at)}</span>
-                  {event.location ? <span>{event.location}</span> : null}
-                  {showOpponent ? <span>対戦相手: {meta.opponent}</span> : null}
+                <article className={`mobile-event-card mobile-event-card-${summary.kind}`} key={event.id}>
+                  <div className="mobile-event-date">
+                    <strong>{eventStartTime(event.start_at)}</strong>
+                  </div>
+                  <div className="mobile-event-body">
+                    <strong>{eventDisplayTitle(event)}</strong>
+                    {event.location ? <span>{event.location}</span> : null}
+                    {showOpponent ? <span>対戦相手: {meta.opponent}</span> : null}
+                  </div>
+                  <span className="mobile-event-badge">{summary.badge}</span>
                 </article>
               );
             })}

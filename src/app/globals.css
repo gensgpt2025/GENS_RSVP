@@ -671,32 +671,73 @@ button:hover,
 
 .mobile-event-list {
   display: grid;
-  gap: 10px;
+  gap: 6px;
 }
 
 .mobile-event-card {
+  display: grid;
+  grid-template-columns: 4px 48px 1fr auto;
+  align-items: center;
+  gap: 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
-  padding: 14px;
+  padding: 10px;
+  position: relative;
 }
 
-.mobile-event-card strong,
-.mobile-event-card span {
+.mobile-event-card::before {
+  content: "";
+  width: 4px;
+  align-self: stretch;
+  border-radius: 999px;
+  background: var(--gold);
+}
+
+.mobile-event-date,
+.mobile-event-body,
+.mobile-event-badge {
   display: block;
 }
 
-.mobile-event-card strong {
+.mobile-event-date strong {
   color: var(--text);
-  font-size: 16px;
-  line-height: 1.45;
-  margin-bottom: 8px;
+  font-size: 14px;
 }
 
-.mobile-event-card span {
+.mobile-event-body strong {
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.mobile-event-body span {
   color: var(--muted);
-  font-size: 13px;
-  line-height: 1.7;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.mobile-event-badge {
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 8px;
+}
+
+.mobile-event-card-league::before,
+.mobile-event-card-league .mobile-event-badge {
+  background: rgba(111, 207, 151, 0.72);
+}
+
+.mobile-event-card-training::before,
+.mobile-event-card-training .mobile-event-badge {
+  background: rgba(214, 164, 92, 0.76);
+}
+
+.mobile-event-card-match::before,
+.mobile-event-card-match .mobile-event-badge {
+  background: rgba(122, 167, 255, 0.78);
 }
 
 .pill {
@@ -794,8 +835,8 @@ button:hover,
   }
 
   .calendar-day {
-    min-height: 78px;
-    padding: 4px 3px;
+    min-height: 84px;
+    padding: 4px;
   }
 
   .calendar-date {
@@ -814,8 +855,8 @@ button:hover,
   .calendar-event {
     width: 100%;
     height: auto;
-    border-radius: 4px;
-    padding: 3px 2px;
+    border-radius: 5px;
+    padding: 4px 3px;
     overflow: hidden;
   }
 
@@ -865,6 +906,10 @@ button:hover,
   .calendar-event-match {
     border-color: rgba(122, 167, 255, 0.52);
     background: rgba(122, 167, 255, 0.22);
+  }
+
+  .calendar-event:nth-child(n + 3) {
+    display: none;
   }
 
   .calendar-toolbar {
