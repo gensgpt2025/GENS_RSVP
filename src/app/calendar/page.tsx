@@ -221,27 +221,21 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
         ) : (
           <div className="mobile-event-list">
             {monthEvents.map((event) => {
-              const meta = eventMeta(event);
               const summary = calendarEventSummary(event);
               const dateParts = eventDateParts(event.start_at);
               return (
                 <article className={`mobile-event-card mobile-event-card-${summary.kind}`} key={event.id}>
-                  <div className="mobile-event-header">
-                    <div className="mobile-event-date">
-                      <strong>{dateParts.date}</strong>
-                      <span className={dateParts.weekendClass}>{dateParts.weekday}</span>
-                    </div>
-                    <strong className="mobile-event-time">{eventTimeRange(event.start_at, event.end_at)}</strong>
+                  <div className="mobile-event-date">
+                    <strong>{dateParts.date}</strong>
+                    <span className={dateParts.weekendClass}>{dateParts.weekday}</span>
                   </div>
-                  <div className="mobile-event-main">
-                    <span className="mobile-event-icon" aria-hidden="true">
-                      {summary.icon}
-                    </span>
+                  <strong className="mobile-event-time">{eventTimeRange(event.start_at, event.end_at)}</strong>
+                  <span className="mobile-event-icon" aria-hidden="true">
+                    {summary.icon}
+                  </span>
+                  <div className="mobile-event-content">
                     <strong className="mobile-event-title">{summary.opponent ? `${summary.label} vs ${summary.opponent}` : summary.label}</strong>
-                  </div>
-                  <div className="mobile-event-meta">
                     {event.location ? <span>{event.location}</span> : null}
-                    {summary.opponent ? <span>{summary.opponent}</span> : meta.notes ? <span>{meta.notes}</span> : null}
                   </div>
                   <div className="mobile-event-footer">
                     <span>{summary.badge}</span>

@@ -1349,3 +1349,156 @@ button:hover,
     white-space: nowrap;
   }
 }
+
+@media (max-width: 640px) {
+  .mobile-event-card {
+    width: 100%;
+    max-width: 100%;
+    min-height: 76px;
+    max-height: 88px;
+    display: grid;
+    grid-template-columns: 5px 48px 72px 24px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 8px;
+    box-sizing: border-box;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .mobile-event-card::before {
+    position: static;
+    grid-column: 1;
+    grid-row: 1;
+    width: 5px;
+    height: 52px;
+    align-self: center;
+    border-radius: 999px;
+  }
+
+  .mobile-event-date {
+    grid-column: 2;
+    display: block;
+    text-align: center;
+    min-width: 0;
+  }
+
+  .mobile-event-date strong,
+  .mobile-event-date span {
+    display: block;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .mobile-event-date span {
+    margin-top: 2px;
+  }
+
+  .mobile-event-time {
+    grid-column: 3;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.2;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .mobile-event-icon {
+    grid-column: 4;
+    font-size: 20px;
+    line-height: 1;
+    text-align: center;
+  }
+
+  .mobile-event-content {
+    grid-column: 5;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .mobile-event-title {
+    display: block;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mobile-event-content span {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.25;
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mobile-event-footer {
+    grid-column: 6;
+    display: flex;
+    justify-content: flex-end;
+    min-width: 0;
+  }
+
+  .mobile-event-footer span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    height: 28px;
+    max-width: 76px;
+    padding: 0 8px;
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mobile-event-meta,
+  .mobile-event-side,
+  .mobile-event-body,
+  .mobile-event-main,
+  .mobile-event-header {
+    display: contents;
+  }
+}
+
+@media (max-width: 390px) {
+  .mobile-event-card {
+    grid-template-columns: 5px 42px 66px 22px minmax(0, 1fr) auto;
+    gap: 5px;
+    padding: 8px 6px;
+  }
+
+  .mobile-event-time,
+  .mobile-event-date strong,
+  .mobile-event-date span {
+    font-size: 11px;
+  }
+
+  .mobile-event-title {
+    font-size: 13px;
+  }
+
+  .mobile-event-content span {
+    font-size: 10px;
+  }
+
+  .mobile-event-footer span {
+    max-width: 64px;
+    padding: 0 6px;
+    font-size: 10px;
+  }
+}
