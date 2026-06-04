@@ -81,14 +81,14 @@ function calendarEventSummary(event: { title: string; description: string | null
   const opponent = meta.opponent || opponentFromTitle(event.title);
 
   if (meta.type === "league" || event.title.startsWith("県リーグ")) {
-    return { kind: "league", label: "リーグ戦", opponent, icon: "⚽", badge: "⚽ 公式戦" };
+    return { kind: "league", label: "リーグ戦", opponent, badge: "公式戦" };
   }
 
   if (meta.type === "match" || event.title.startsWith("練習試合")) {
-    return { kind: "match", label: "練習試合", opponent, icon: "🥅", badge: "🥅 練習試合" };
+    return { kind: "match", label: "練習試合", opponent, badge: "練習試合" };
   }
 
-  return { kind: "training", label: "トレーニング", opponent: "", icon: "🏃", badge: "🏃 練習" };
+  return { kind: "training", label: "トレーニング", opponent: "", badge: "練習" };
 }
 
 function buildCalendarDays(month: Date) {
@@ -230,9 +230,6 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
                     <span className={dateParts.weekendClass}>{dateParts.weekday}</span>
                   </div>
                   <strong className="mobile-event-time">{eventTimeRange(event.start_at, event.end_at)}</strong>
-                  <span className="mobile-event-icon" aria-hidden="true">
-                    {summary.icon}
-                  </span>
                   <div className="mobile-event-content">
                     <strong className="mobile-event-title">{summary.opponent ? `${summary.label} vs ${summary.opponent}` : summary.label}</strong>
                     {event.location ? <span>{event.location}</span> : null}

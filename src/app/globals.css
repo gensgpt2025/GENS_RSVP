@@ -744,12 +744,6 @@ button:hover,
   color: #ff6969;
 }
 
-.mobile-event-icon {
-  font-size: 22px;
-  line-height: 1;
-  text-align: center;
-}
-
 .mobile-event-body strong {
   color: var(--text);
   display: block;
@@ -820,10 +814,6 @@ button:hover,
 
   .mobile-event-body span {
     font-size: 11px;
-  }
-
-  .mobile-event-icon {
-    font-size: 20px;
   }
 
   .mobile-event-side strong {
@@ -1286,20 +1276,6 @@ button:hover,
     text-align: right;
   }
 
-  .mobile-event-main {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    min-width: 0;
-  }
-
-  .mobile-event-icon {
-    flex: 0 0 auto;
-    font-size: 20px;
-    line-height: 1.2;
-    text-align: left;
-  }
-
   .mobile-event-title {
     color: var(--text);
     font-size: 17px;
@@ -1357,7 +1333,7 @@ button:hover,
     min-height: 76px;
     max-height: 88px;
     display: grid;
-    grid-template-columns: 5px 48px 72px 24px minmax(0, 1fr) auto;
+    grid-template-columns: 5px 48px 72px minmax(0, 1fr) auto;
     align-items: center;
     gap: 6px;
     padding: 8px 8px;
@@ -1406,15 +1382,8 @@ button:hover,
     white-space: nowrap;
   }
 
-  .mobile-event-icon {
-    grid-column: 4;
-    font-size: 20px;
-    line-height: 1;
-    text-align: center;
-  }
-
   .mobile-event-content {
-    grid-column: 5;
+    grid-column: 4;
     min-width: 0;
     overflow: hidden;
   }
@@ -1442,7 +1411,7 @@ button:hover,
   }
 
   .mobile-event-footer {
-    grid-column: 6;
+    grid-column: 5;
     display: flex;
     justify-content: flex-end;
     min-width: 0;
@@ -1477,7 +1446,7 @@ button:hover,
 
 @media (max-width: 390px) {
   .mobile-event-card {
-    grid-template-columns: 5px 42px 66px 22px minmax(0, 1fr) auto;
+    grid-template-columns: 5px 42px 66px minmax(0, 1fr) auto;
     gap: 5px;
     padding: 8px 6px;
   }
