@@ -705,6 +705,18 @@ button:hover,
   display: block;
 }
 
+.mobile-event-header,
+.mobile-event-main,
+.mobile-event-meta,
+.mobile-event-footer {
+  display: contents;
+}
+
+.mobile-event-time,
+.mobile-event-title {
+  display: block;
+}
+
 .mobile-event-date strong {
   color: var(--text);
   display: block;
@@ -845,6 +857,18 @@ button:hover,
 }
 
 .mobile-event-card-match .mobile-event-side span {
+  background: rgba(122, 167, 255, 0.78);
+}
+
+.mobile-event-card-league .mobile-event-footer span {
+  background: rgba(111, 207, 151, 0.72);
+}
+
+.mobile-event-card-training .mobile-event-footer span {
+  background: rgba(214, 164, 92, 0.76);
+}
+
+.mobile-event-card-match .mobile-event-footer span {
   background: rgba(122, 167, 255, 0.78);
 }
 
@@ -1193,5 +1217,135 @@ button:hover,
 
   .calendar-event-match {
     background: rgba(122, 167, 255, 0.9);
+  }
+}
+
+@media (max-width: 640px) {
+  .mobile-event-list {
+    gap: 8px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .mobile-event-card {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
+    max-height: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 12px 12px 20px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .mobile-event-card::before {
+    position: absolute;
+    left: 8px;
+    top: 12px;
+    bottom: 12px;
+    width: 4px;
+    border-radius: 999px;
+  }
+
+  .mobile-event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .mobile-event-date {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 2px;
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  .mobile-event-date strong,
+  .mobile-event-date span,
+  .mobile-event-time {
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.25;
+    white-space: nowrap;
+  }
+
+  .mobile-event-date span {
+    margin-top: 0;
+  }
+
+  .mobile-event-time {
+    color: var(--text);
+    flex: 0 0 auto;
+    text-align: right;
+  }
+
+  .mobile-event-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .mobile-event-icon {
+    flex: 0 0 auto;
+    font-size: 20px;
+    line-height: 1.2;
+    text-align: left;
+  }
+
+  .mobile-event-title {
+    color: var(--text);
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.35;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .mobile-event-meta {
+    display: grid;
+    gap: 2px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.4;
+    padding-left: 28px;
+    min-width: 0;
+  }
+
+  .mobile-event-meta span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-event-footer {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .mobile-event-footer span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 26px;
+    max-width: 100%;
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 800;
+    padding: 0 10px;
+    white-space: nowrap;
   }
 }
