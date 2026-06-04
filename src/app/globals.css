@@ -1359,10 +1359,18 @@ button:hover,
     min-width: 0;
   }
 
+  .mobile-event-date-line {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 1px;
+    min-width: 0;
+    white-space: nowrap;
+  }
+
   .mobile-event-date strong,
   .mobile-event-date span,
   .mobile-event-date em {
-    display: block;
     font-weight: 800;
     line-height: 1.2;
     white-space: nowrap;
@@ -1370,18 +1378,20 @@ button:hover,
 
   .mobile-event-date strong,
   .mobile-event-date span {
+    display: inline;
     font-size: 13px;
   }
 
   .mobile-event-date span {
-    margin-top: 2px;
+    margin-top: 0;
   }
 
   .mobile-event-date em {
+    display: block;
     color: var(--text);
     font-size: 11px;
     font-style: normal;
-    margin-top: 6px;
+    margin-top: 5px;
   }
 
   .mobile-event-content {
@@ -1513,6 +1523,14 @@ button:hover,
     text-align: center;
   }
 
+  .mobile-event-date-line {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 1px;
+    white-space: nowrap;
+  }
+
   .mobile-event-date strong,
   .mobile-event-date span,
   .mobile-event-date em {
@@ -1520,6 +1538,11 @@ button:hover,
     font-weight: 800;
     line-height: 1.2;
     white-space: nowrap;
+  }
+
+  .mobile-event-date strong,
+  .mobile-event-date span {
+    display: inline;
   }
 
   .mobile-event-date em {

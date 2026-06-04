@@ -226,8 +226,10 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
               return (
                 <article className={`mobile-event-card mobile-event-card-${summary.kind}`} key={event.id}>
                   <div className="mobile-event-date">
-                    <strong>{dateParts.date}</strong>
-                    <span className={dateParts.weekendClass}>{dateParts.weekday}</span>
+                    <div className="mobile-event-date-line">
+                      <strong>{dateParts.date}</strong>
+                      <span className={dateParts.weekendClass}>{dateParts.weekday}</span>
+                    </div>
                     <em>{eventTimeRange(event.start_at, event.end_at)}</em>
                   </div>
                   <div className="mobile-event-content">
