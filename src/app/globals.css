@@ -1180,21 +1180,37 @@ button:hover,
   }
 
   .calendar-event {
-    min-height: 10px;
-    height: 10px;
+    min-height: 14px;
+    height: 14px;
     border: 0;
     border-radius: 999px;
-    padding: 0;
+    padding: 0 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .calendar-event-title,
   .calendar-event-meta,
-  .calendar-event .calendar-event-mobile,
   .calendar-event strong,
-  .calendar-event span,
   .calendar-event b,
   .calendar-event em {
     display: none !important;
+  }
+
+  .calendar-event .calendar-event-mobile {
+    display: block !important;
+    max-width: 100%;
+    color: rgba(255, 255, 255, 0.96);
+    font-size: 7px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0;
+    overflow: hidden;
+    text-align: center;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.24);
+    white-space: nowrap;
   }
 
   .calendar-event-league {
