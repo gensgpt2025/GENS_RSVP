@@ -53,6 +53,21 @@ function eventStartTime(value: string) {
   return `${map.hour}:${map.minute}`;
 }
 
+function eventTimeRange(start: string, end: string) {
+  return `${eventStartTime(start)}-${eventStartTime(end)}`;
+}
+
+function eventDateLabel(value: string) {
+  const parts = new Intl.DateTimeFormat("ja-JP", {
+    month: "numeric",
+    day: "numeric",
+    weekday: "short",
+    timeZone: "Asia/Tokyo",
+  }).formatToParts(new Date(value));
+  const map = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${map.month}/${map.day}(${map.weekday})`;
+}
+
 function opponentFromTitle(title: string) {
   return title.match(/^(練習試合|県リーグ)\s+vs\s+(.+)$/i)?.[2]?.trim() ?? "";
 }
@@ -62,14 +77,14 @@ function calendarEventSummary(event: { title: string; description: string | null
   const opponent = meta.opponent || opponentFromTitle(event.title);
 
   if (meta.type === "league" || event.title.startsWith("県リーグ")) {
-    return { kind: "league", label: "リーグ戦", detail: opponent, badge: "試合" };
+    return { kind: "league", label: "リーグ戦", opponent, icon: "⚽", badge: "試合" };
   }
 
   if (meta.type === "match" || event.title.startsWith("練習試合")) {
-    return { kind: "match", label: "練習試合", detail: opponent, badge: "試合" };
+    return { kind: "match", label: "練習試合", opponent, icon: "⚽", badge: "試合" };
   }
 
-  return { kind: "training", label: "トレーニング", detail: eventStartTime(event.start_at), badge: "練習" };
+  return { kind: "training", label: "トレーニング", opponent: "", icon: "🚧", badge: "練習" };
 }
 
 function buildCalendarDays(month: Date) {
@@ -176,10 +191,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
                     return (
                       <div className={`calendar-event calendar-event-${summary.kind}`} key={event.id}>
                         <strong className="calendar-event-title">{eventDisplayTitle(event)}</strong>
-                        <span className="calendar-event-mobile">
-                          <b>{summary.label}</b>
-                          {summary.detail ? <em>{summary.detail}</em> : null}
-                        </span>
+                        <span className="calendar-event-mobile" aria-label={summary.label} />
                         <span className="calendar-event-meta">{formatEventRange(event.start_at, event.end_at)}</span>
                         {event.location ? <span className="calendar-event-meta">{event.location}</span> : null}
                         {showOpponent ? <span className="calendar-event-meta">対戦相手: {meta.opponent}</span> : null}
@@ -206,19 +218,24 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
           <div className="mobile-event-list">
             {monthEvents.map((event) => {
               const meta = eventMeta(event);
-              const showOpponent = (meta.type === "match" || meta.type === "league") && meta.opponent;
               const summary = calendarEventSummary(event);
               return (
                 <article className={`mobile-event-card mobile-event-card-${summary.kind}`} key={event.id}>
                   <div className="mobile-event-date">
-                    <strong>{eventStartTime(event.start_at)}</strong>
+                    <strong>{eventDateLabel(event.start_at)}</strong>
                   </div>
+                  <span className="mobile-event-icon" aria-hidden="true">
+                    {summary.icon}
+                  </span>
                   <div className="mobile-event-body">
-                    <strong>{eventDisplayTitle(event)}</strong>
-                    {event.location ? <span>{event.location}</span> : null}
-                    {showOpponent ? <span>対戦相手: {meta.opponent}</span> : null}
+                    <strong>{summary.opponent ? `${summary.label} vs ${summary.opponent}` : summary.label}</strong>
+                    {summary.opponent ? <span>対戦相手: {summary.opponent}</span> : null}
+                    {event.location ? <span>場所: {event.location}</span> : null}
                   </div>
-                  <span className="mobile-event-badge">{summary.badge}</span>
+                  <div className="mobile-event-side">
+                    <strong>{eventTimeRange(event.start_at, event.end_at)}</strong>
+                    <span>{summary.badge}</span>
+                  </div>
                 </article>
               );
             })}

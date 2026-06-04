@@ -676,18 +676,19 @@ button:hover,
 
 .mobile-event-card {
   display: grid;
-  grid-template-columns: 4px 48px 1fr auto;
+  grid-template-columns: 46px 4px 32px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
-  padding: 10px;
+  padding: 8px 10px;
   position: relative;
 }
 
 .mobile-event-card::before {
   content: "";
+  grid-column: 2;
   width: 4px;
   align-self: stretch;
   border-radius: 999px;
@@ -696,47 +697,86 @@ button:hover,
 
 .mobile-event-date,
 .mobile-event-body,
-.mobile-event-badge {
+.mobile-event-side {
   display: block;
 }
 
 .mobile-event-date strong {
   color: var(--text);
   font-size: 14px;
+  line-height: 1.25;
+}
+
+.mobile-event-icon {
+  font-size: 22px;
+  line-height: 1;
+  text-align: center;
 }
 
 .mobile-event-body strong {
   color: var(--text);
-  font-size: 16px;
-  line-height: 1.35;
+  display: block;
+  font-size: 14px;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .mobile-event-body span {
   color: var(--muted);
-  font-size: 12px;
-  line-height: 1.5;
+  display: block;
+  font-size: 11px;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.mobile-event-badge {
-  border-radius: 6px;
+.mobile-event-side {
+  text-align: right;
+}
+
+.mobile-event-side strong {
   color: var(--text);
-  font-size: 12px;
+  display: block;
+  font-size: 13px;
   font-weight: 700;
-  padding: 6px 8px;
+  line-height: 1.25;
+  white-space: nowrap;
 }
 
-.mobile-event-card-league::before,
-.mobile-event-card-league .mobile-event-badge {
+.mobile-event-side span {
+  border-radius: 5px;
+  color: var(--text);
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 5px;
+  padding: 3px 6px;
+}
+
+.mobile-event-card-league::before {
   background: rgba(111, 207, 151, 0.72);
 }
 
-.mobile-event-card-training::before,
-.mobile-event-card-training .mobile-event-badge {
+.mobile-event-card-league .mobile-event-side span {
+  background: rgba(111, 207, 151, 0.72);
+}
+
+.mobile-event-card-training::before {
   background: rgba(214, 164, 92, 0.76);
 }
 
-.mobile-event-card-match::before,
-.mobile-event-card-match .mobile-event-badge {
+.mobile-event-card-training .mobile-event-side span {
+  background: rgba(214, 164, 92, 0.76);
+}
+
+.mobile-event-card-match::before {
+  background: rgba(122, 167, 255, 0.78);
+}
+
+.mobile-event-card-match .mobile-event-side span {
   background: rgba(122, 167, 255, 0.78);
 }
 
@@ -1044,5 +1084,42 @@ button:hover,
   .mobile-month-list {
     display: block;
     margin-top: 16px;
+  }
+}
+
+@media (max-width: 900px) {
+  .calendar-day {
+    min-height: 58px;
+  }
+
+  .calendar-events {
+    display: grid;
+    gap: 3px;
+  }
+
+  .calendar-event {
+    min-height: 5px;
+    height: 5px;
+    border: 0;
+    border-radius: 999px;
+    padding: 0;
+  }
+
+  .calendar-event-title,
+  .calendar-event-meta,
+  .calendar-event .calendar-event-mobile {
+    display: none;
+  }
+
+  .calendar-event-league {
+    background: rgba(111, 207, 151, 0.86);
+  }
+
+  .calendar-event-training {
+    background: rgba(214, 164, 92, 0.86);
+  }
+
+  .calendar-event-match {
+    background: rgba(122, 167, 255, 0.9);
   }
 }
