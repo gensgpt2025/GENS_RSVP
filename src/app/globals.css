@@ -676,20 +676,24 @@ button:hover,
 
 .mobile-event-card {
   display: grid;
-  grid-template-columns: 4px 82px 28px minmax(0, 1fr) auto;
-  align-items: start;
+  grid-template-columns: 48px 5px 30px minmax(0, 1fr) 92px;
+  align-items: center;
   gap: 8px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
-  padding: 8px 10px;
+  min-width: 0;
+  min-height: 84px;
+  max-height: 96px;
+  overflow: hidden;
+  padding: 8px;
   position: relative;
 }
 
 .mobile-event-card::before {
   content: "";
   grid-column: 2;
-  width: 4px;
+  width: 5px;
   align-self: stretch;
   border-radius: 999px;
   background: var(--gold);
@@ -704,21 +708,32 @@ button:hover,
 .mobile-event-date strong {
   color: var(--text);
   display: block;
-  font-size: 13px;
+  font-size: 15px;
+  font-weight: 800;
   line-height: 1.25;
+  text-align: center;
 }
 
 .mobile-event-date span {
   color: var(--text);
   display: block;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
-  line-height: 1.35;
-  margin-top: 6px;
+  line-height: 1.25;
+  margin-top: 3px;
+  text-align: center;
+}
+
+.mobile-event-date .saturday {
+  color: #5c9dff;
+}
+
+.mobile-event-date .sunday {
+  color: #ff6969;
 }
 
 .mobile-event-icon {
-  font-size: 20px;
+  font-size: 22px;
   line-height: 1;
   text-align: center;
 }
@@ -726,18 +741,23 @@ button:hover,
 .mobile-event-body strong {
   color: var(--text);
   display: block;
-  font-size: 14px;
-  line-height: 1.3;
-  overflow-wrap: anywhere;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .mobile-event-body span {
   color: var(--muted);
   display: block;
-  font-size: 11px;
-  line-height: 1.35;
+  font-size: 12px;
+  line-height: 1.32;
   margin-top: 2px;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .mobile-event-side {
@@ -745,44 +765,62 @@ button:hover,
 }
 
 .mobile-event-side strong {
-  display: none;
+  color: var(--text);
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
+  white-space: nowrap;
 }
 
 .mobile-event-side span {
   border-radius: 5px;
   color: var(--text);
   display: inline-block;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  margin-top: 5px;
-  padding: 3px 6px;
+  margin-top: 8px;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 6px 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (max-width: 520px) {
   .mobile-event-card {
-    grid-template-columns: 4px 76px 24px minmax(0, 1fr) auto;
-    gap: 7px;
+    grid-template-columns: 42px 5px 26px minmax(0, 1fr) 82px;
+    gap: 6px;
     padding: 8px;
   }
 
   .mobile-event-date strong {
-    font-size: 12px;
+    font-size: 14px;
   }
 
   .mobile-event-date span {
-    font-size: 11px;
-  }
-
-  .mobile-event-body strong {
     font-size: 13px;
   }
 
+  .mobile-event-body strong {
+    font-size: 14px;
+  }
+
   .mobile-event-body span {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .mobile-event-icon {
-    font-size: 18px;
+    font-size: 20px;
+  }
+
+  .mobile-event-side strong {
+    font-size: 12px;
+  }
+
+  .mobile-event-side span {
+    font-size: 11px;
+    padding: 5px 6px;
   }
 }
 
