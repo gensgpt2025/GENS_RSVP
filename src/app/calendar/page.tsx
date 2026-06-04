@@ -228,8 +228,8 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
                   <div className="mobile-event-date">
                     <strong>{dateParts.date}</strong>
                     <span className={dateParts.weekendClass}>{dateParts.weekday}</span>
+                    <em>{eventTimeRange(event.start_at, event.end_at)}</em>
                   </div>
-                  <strong className="mobile-event-time">{eventTimeRange(event.start_at, event.end_at)}</strong>
                   <div className="mobile-event-content">
                     <strong className="mobile-event-title">{summary.opponent ? `${summary.label} vs ${summary.opponent}` : summary.label}</strong>
                     {event.location ? <span>{event.location}</span> : null}
