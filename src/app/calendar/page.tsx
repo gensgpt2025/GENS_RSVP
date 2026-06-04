@@ -223,6 +223,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
                 <article className={`mobile-event-card mobile-event-card-${summary.kind}`} key={event.id}>
                   <div className="mobile-event-date">
                     <strong>{eventDateLabel(event.start_at)}</strong>
+                    <span>{eventTimeRange(event.start_at, event.end_at)}</span>
                   </div>
                   <span className="mobile-event-icon" aria-hidden="true">
                     {summary.icon}
@@ -233,7 +234,6 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
                     {event.location ? <span>場所: {event.location}</span> : null}
                   </div>
                   <div className="mobile-event-side">
-                    <strong>{eventTimeRange(event.start_at, event.end_at)}</strong>
                     <span>{summary.badge}</span>
                   </div>
                 </article>
