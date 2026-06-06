@@ -3,7 +3,12 @@
 import { useMemo, useState } from "react";
 import { CalendarPlus } from "lucide-react";
 
-const categories = ["練習試合", "県リーグ", "トレーニング"];
+const eventTypes = [
+  { value: "match", label: "練習試合", defaultTitle: "練習試合" },
+  { value: "league", label: "公式戦", defaultTitle: "県リーグ" },
+  { value: "training", label: "練習", defaultTitle: "トレーニング" },
+  { value: "other", label: "その他", defaultTitle: "" },
+];
 const hours = Array.from({ length: 24 }, (_, index) => String(index).padStart(2, "0"));
 const baseMinutes = Array.from({ length: 12 }, (_, index) => String(index * 5).padStart(2, "0"));
 
@@ -13,6 +18,8 @@ type EventFormProps = {
   defaults?: {
     id?: string;
     category?: string;
+    eventType?: string;
+    titleText?: string;
     opponent?: string;
     datetimeRange?: string;
     location?: string;
@@ -47,18 +54,36 @@ function minutesWithCurrent(...values: string[]) {
   return Array.from(new Set([...baseMinutes, ...values.filter(Boolean)])).sort((a, b) => Number(a) - Number(b));
 }
 
+function normalizeEventType(value?: string) {
+  if (value && eventTypes.some((item) => item.value === value)) return value;
+  if (value === "練習試合") return "match";
+  if (value === "県リーグ" || value === "公式戦") return "league";
+  if (value === "トレーニング" || value === "練習") return "training";
+  return "training";
+}
+
+function defaultTitleForType(value: string) {
+  return eventTypes.find((item) => item.value === value)?.defaultTitle ?? "";
+}
+
 export function EventForm({ action, buttonLabel, defaults }: EventFormProps) {
-  const initialCategory = defaults?.category && categories.includes(defaults.category) ? defaults.category : categories[0];
+  const initialEventType = normalizeEventType(defaults?.eventType ?? defaults?.category);
   const initialDateTime = parseDateTimeRange(defaults?.datetimeRange);
-  const [category, setCategory] = useState(initialCategory);
+  const [eventType, setEventType] = useState(initialEventType);
+  const [titleText, setTitleText] = useState(defaults?.titleText ?? defaultTitleForType(initialEventType));
   const [date, setDate] = useState(initialDateTime.date);
   const [startHour, setStartHour] = useState(initialDateTime.startHour);
   const [startMinute, setStartMinute] = useState(initialDateTime.startMinute);
   const [endHour, setEndHour] = useState(initialDateTime.endHour);
   const [endMinute, setEndMinute] = useState(initialDateTime.endMinute);
-  const needsOpponent = useMemo(() => category === "練習試合" || category === "県リーグ", [category]);
+  const needsOpponent = useMemo(() => eventType === "match" || eventType === "league", [eventType]);
   const minutes = useMemo(() => minutesWithCurrent(startMinute, endMinute), [startMinute, endMinute]);
   const datetimeRange = date ? `${date.replaceAll("-", "/")} ${startHour}:${startMinute}-${endHour}:${endMinute}` : "";
+
+  function changeEventType(value: string) {
+    setEventType(value);
+    setTitleText((current) => current || defaultTitleForType(value));
+  }
 
   return (
     <form action={action} className="stack-form">
@@ -108,14 +133,19 @@ export function EventForm({ action, buttonLabel, defaults }: EventFormProps) {
       </label>
 
       <label>
-        <span>内容</span>
-        <select name="category" value={category} onChange={(event) => setCategory(event.target.value)} required>
-          {categories.map((item) => (
-            <option value={item} key={item}>
-              {item}
+        <span>種別</span>
+        <select name="event_type" value={eventType} onChange={(event) => changeEventType(event.target.value)} required>
+          {eventTypes.map((item) => (
+            <option value={item.value} key={item.value}>
+              {item.label}
             </option>
           ))}
         </select>
+      </label>
+
+      <label>
+        <span>内容</span>
+        <input name="title_text" value={titleText} onChange={(event) => setTitleText(event.target.value)} placeholder="例：県リーグ 第3節" required />
       </label>
 
       {needsOpponent ? (

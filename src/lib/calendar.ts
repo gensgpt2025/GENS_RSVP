@@ -1,4 +1,5 @@
 import type { EventItem } from "@/lib/types";
+import { eventDisplayTitle } from "@/lib/events";
 
 function toCalendarDate(value: string) {
   return new Date(value).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
@@ -33,7 +34,7 @@ function displayDescription(event: EventItem) {
 export function googleCalendarUrl(event: EventItem) {
   const params = new URLSearchParams({
     action: "TEMPLATE",
-    text: event.title,
+    text: eventDisplayTitle(event),
     dates: `${toCalendarDate(event.start_at)}/${toCalendarDate(event.end_at)}`,
     details: displayDescription(event),
     location: event.location ?? "",
@@ -55,7 +56,7 @@ export function icsForEvent(event: EventItem) {
     `DTSTAMP:${now}`,
     `DTSTART:${toCalendarDate(event.start_at)}`,
     `DTEND:${toCalendarDate(event.end_at)}`,
-    `SUMMARY:${escapeIcs(event.title)}`,
+    `SUMMARY:${escapeIcs(eventDisplayTitle(event))}`,
     `DESCRIPTION:${escapeIcs(displayDescription(event))}`,
     `LOCATION:${escapeIcs(event.location ?? "")}`,
     "END:VEVENT",

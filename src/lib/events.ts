@@ -73,14 +73,17 @@ export function eventMeta(event: { description: string | null; title: string }) 
 
 export function eventDisplayTitle(event: { title: string; description: string | null }) {
   const meta = eventMeta(event);
-  const match = event.title.match(/^(練習試合|県リーグ)\s+vs\s+(.+)$/i);
+  const match = event.title.match(/^(練習試合|県リーグ|公式戦)\s+vs\s+(.+)$/i);
   if (match) {
     return `${match[1]} VS ${match[2].trim()}`;
   }
 
   if ((meta.type === "match" || meta.type === "league") && meta.opponent) {
-    const title = meta.type === "match" ? "練習試合" : "県リーグ";
-    return `${title} VS ${meta.opponent}`;
+    if (event.title.toLowerCase().includes(" vs ") || event.title.includes(meta.opponent)) {
+      return event.title;
+    }
+
+    return `${event.title} VS ${meta.opponent}`;
   }
 
   return event.title;

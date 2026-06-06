@@ -688,6 +688,12 @@ button:hover,
   box-shadow: inset 3px 0 0 rgba(122, 167, 255, 0.94);
 }
 
+.calendar-event-other {
+  border-color: rgba(201, 168, 106, 0.5);
+  background: linear-gradient(135deg, rgba(201, 168, 106, 0.22), rgba(201, 168, 106, 0.08));
+  box-shadow: inset 3px 0 0 rgba(201, 168, 106, 0.9);
+}
+
 .calendar-event strong,
 .calendar-event span {
   display: block;
@@ -894,6 +900,14 @@ button:hover,
   background: rgba(122, 167, 255, 0.78);
 }
 
+.mobile-event-card-other::before {
+  background: rgba(201, 168, 106, 0.76);
+}
+
+.mobile-event-card-other .mobile-event-side span {
+  background: rgba(201, 168, 106, 0.76);
+}
+
 .mobile-event-card-league .mobile-event-footer span {
   background: rgba(111, 207, 151, 0.72);
 }
@@ -904,6 +918,10 @@ button:hover,
 
 .mobile-event-card-match .mobile-event-footer span {
   background: rgba(122, 167, 255, 0.78);
+}
+
+.mobile-event-card-other .mobile-event-footer span {
+  background: rgba(201, 168, 106, 0.76);
 }
 
 .pill {
@@ -1267,6 +1285,10 @@ button:hover,
 
   .calendar-event-match {
     background: rgba(122, 167, 255, 0.9);
+  }
+
+  .calendar-event-other {
+    background: rgba(201, 168, 106, 0.88);
   }
 }
 

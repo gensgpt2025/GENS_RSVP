@@ -87,9 +87,11 @@ function toIso(date: ReturnType<typeof parseDate>, time: ReturnType<typeof parse
 
 function mapType(type: string, fallbackTitle: string) {
   const normalized = type.trim().toLowerCase();
+  if (fallbackTitle) return fallbackTitle;
   if (normalized === "match") return "練習試合";
   if (normalized === "league") return "県リーグ";
-  if (normalized === "training") return fallbackTitle.includes("中止") ? "トレーニング 中止" : "トレーニング";
+  if (normalized === "training") return "トレーニング";
+  if (normalized === "other") return "その他";
   return fallbackTitle || type;
 }
 

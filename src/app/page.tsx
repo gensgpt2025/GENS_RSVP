@@ -103,10 +103,14 @@ function memberNamesByStatus(rsvps: Rsvp[], members: Member[], status: RsvpStatu
 
 function eventFormDefaults(event: EventWithRsvps) {
   const meta = eventMeta(event);
-  const match = event.title.match(/^(練習試合|県リーグ)\s+vs\s+(.+)$/);
+  const match = event.title.match(/^(練習試合|県リーグ|公式戦)\s+vs\s+(.+)$/i);
+  const eventType =
+    meta.type ||
+    (match?.[1] === "練習試合" ? "match" : match?.[1] === "県リーグ" || match?.[1] === "公式戦" ? "league" : event.title === "トレーニング" ? "training" : "other");
   return {
     id: event.id,
-    category: match ? match[1] : event.title === "県リーグ" || event.title === "練習試合" || event.title === "トレーニング" ? event.title : "トレーニング",
+    eventType,
+    titleText: match ? match[1] : event.title,
     opponent: match?.[2] ?? meta.opponent,
     datetimeRange: toDateTimeRangeInput(event.start_at, event.end_at),
     location: event.location ?? "",

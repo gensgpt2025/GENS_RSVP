@@ -73,7 +73,7 @@ function eventDateParts(value: string) {
 }
 
 function opponentFromTitle(title: string) {
-  return title.match(/^(練習試合|県リーグ)\s+vs\s+(.+)$/i)?.[2]?.trim() ?? "";
+  return title.match(/^(練習試合|県リーグ|公式戦)\s+vs\s+(.+)$/i)?.[2]?.trim() ?? "";
 }
 
 function calendarEventSummary(event: { title: string; description: string | null; start_at: string }) {
@@ -81,14 +81,18 @@ function calendarEventSummary(event: { title: string; description: string | null
   const opponent = meta.opponent || opponentFromTitle(event.title);
 
   if (meta.type === "league" || event.title.startsWith("県リーグ")) {
-    return { kind: "league", label: "リーグ戦", opponent, badge: "公式戦" };
+    return { kind: "league", opponent, badge: "公式戦" };
   }
 
   if (meta.type === "match" || event.title.startsWith("練習試合")) {
-    return { kind: "match", label: "練習試合", opponent, badge: "練習試合" };
+    return { kind: "match", opponent, badge: "練習試合" };
   }
 
-  return { kind: "training", label: "トレーニング", opponent: "", badge: "練習" };
+  if (meta.type === "other") {
+    return { kind: "other", opponent: "", badge: "その他" };
+  }
+
+  return { kind: "training", opponent: "", badge: "練習" };
 }
 
 function buildCalendarDays(month: Date) {
@@ -235,7 +239,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
                     <em>{eventTimeRange(event.start_at, event.end_at)}</em>
                   </div>
                   <div className="mobile-event-content">
-                    <strong className="mobile-event-title">{summary.opponent ? `${summary.label} vs ${summary.opponent}` : summary.label}</strong>
+                    <strong className="mobile-event-title">{eventDisplayTitle(event)}</strong>
                     {event.location ? <span>{event.location}</span> : null}
                   </div>
                   <div className="mobile-event-footer">

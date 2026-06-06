@@ -37,12 +37,28 @@ function japanDateTimeRangeToIso(value: string) {
   return { startIso: start.toISOString(), endIso: end.toISOString() };
 }
 
-function eventTitle(category: string, opponent: string) {
-  if ((category === "練習試合" || category === "県リーグ") && opponent) {
-    return `${category} vs ${opponent}`;
-  }
+function normalizeEventType(value: string) {
+  if (["match", "league", "training", "other"].includes(value)) return value;
+  if (value === "練習試合") return "match";
+  if (value === "県リーグ" || value === "公式戦") return "league";
+  if (value === "トレーニング" || value === "練習") return "training";
+  return "other";
+}
 
-  return category;
+function fallbackTitle(eventType: string) {
+  if (eventType === "match") return "練習試合";
+  if (eventType === "league") return "県リーグ";
+  if (eventType === "training") return "トレーニング";
+  return "その他";
+}
+
+function eventDescription(notes: string, eventType: string, opponent: string) {
+  const showOpponent = eventType === "match" || eventType === "league";
+  return JSON.stringify({
+    notes,
+    type: eventType,
+    opponent: showOpponent ? opponent : "",
+  });
 }
 
 function memberLoginEmail(name: string) {
@@ -101,14 +117,14 @@ export async function createEventAction(formData: FormData) {
   const user = await requireUser();
   await ensureSchema();
 
-  const category = readString(formData, "category");
+  const eventType = normalizeEventType(readString(formData, "event_type") || readString(formData, "category"));
+  const title = readString(formData, "title_text") || fallbackTitle(eventType);
   const opponent = readString(formData, "opponent");
-  const title = eventTitle(category, opponent);
   const description = readString(formData, "description");
   const location = readString(formData, "location");
   const datetimeRange = readString(formData, "datetime_range");
 
-  if (!category || !datetimeRange) return;
+  if (!eventType || !datetimeRange) return;
 
   const range = japanDateTimeRangeToIso(datetimeRange);
   if (!range) return;
@@ -118,7 +134,7 @@ export async function createEventAction(formData: FormData) {
     VALUES (
       ${crypto.randomUUID()},
       ${title},
-      ${description || null},
+      ${eventDescription(description, eventType, opponent)},
       ${location || null},
       ${range.startIso},
       ${range.endIso},
@@ -134,14 +150,14 @@ export async function updateEventAction(formData: FormData) {
   await ensureSchema();
 
   const eventId = readString(formData, "event_id");
-  const category = readString(formData, "category");
+  const eventType = normalizeEventType(readString(formData, "event_type") || readString(formData, "category"));
+  const title = readString(formData, "title_text") || fallbackTitle(eventType);
   const opponent = readString(formData, "opponent");
-  const title = eventTitle(category, opponent);
   const description = readString(formData, "description");
   const location = readString(formData, "location");
   const datetimeRange = readString(formData, "datetime_range");
 
-  if (!eventId || !category || !datetimeRange) return;
+  if (!eventId || !eventType || !datetimeRange) return;
 
   const range = japanDateTimeRangeToIso(datetimeRange);
   if (!range) return;
@@ -149,7 +165,7 @@ export async function updateEventAction(formData: FormData) {
   await sql`
     UPDATE events
     SET title = ${title},
-        description = ${description || null},
+        description = ${eventDescription(description, eventType, opponent)},
         location = ${location || null},
         start_at = ${range.startIso},
         end_at = ${range.endIso}
