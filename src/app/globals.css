@@ -485,6 +485,32 @@ button:hover,
   gap: 13px;
 }
 
+.datetime-picker-grid {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) auto auto auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.time-select-group {
+  display: grid;
+  grid-template-columns: minmax(62px, 1fr) auto minmax(62px, 1fr);
+  gap: 5px;
+  align-items: center;
+}
+
+.time-select-group span,
+.datetime-separator {
+  color: var(--muted);
+  font-weight: 800;
+  text-align: center;
+}
+
+.datetime-picker-grid select,
+.datetime-picker-grid input {
+  min-width: 0;
+}
+
 .sync-form {
   margin-bottom: 14px;
 }
@@ -1245,6 +1271,22 @@ button:hover,
 }
 
 @media (max-width: 640px) {
+  .datetime-picker-grid {
+    grid-template-columns: 1fr auto 1fr;
+  }
+
+  .datetime-picker-grid > input {
+    grid-column: 1 / -1;
+  }
+
+  .time-select-group {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+
+  .datetime-separator {
+    align-self: center;
+  }
+
   .mobile-event-list {
     gap: 8px;
     width: 100%;

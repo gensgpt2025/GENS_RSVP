@@ -11,6 +11,7 @@ import {
 import { EventForm } from "@/app/event-form";
 import { EventDeleteForm } from "@/app/event-delete-form";
 import { CountdownBlock, LoginForm } from "@/app/login-form";
+import { MemberDeleteForm } from "@/app/member-delete-form";
 import { MemberForm } from "@/app/member-form";
 import { SheetSyncForm } from "@/app/sheet-sync-form";
 import { getCurrentUser } from "@/lib/auth";
@@ -301,26 +302,7 @@ export default async function Home() {
             </div>
             <MemberForm />
 
-            <form action={deleteMemberAction} className="stack-form member-control-form">
-              <label>
-                <span>削除するメンバー</span>
-                <select name="member_id" required defaultValue="">
-                  <option value="" disabled>
-                    メンバーを選択
-                  </option>
-                  {members
-                    .filter((member) => member.id !== user.id)
-                    .map((member) => (
-                      <option value={member.id} key={member.id}>
-                        {member.name}
-                      </option>
-                    ))}
-                </select>
-              </label>
-              <button className="danger-button" type="submit">
-                メンバーを削除
-              </button>
-            </form>
+            <MemberDeleteForm action={deleteMemberAction} members={members.filter((member) => member.id !== user.id)} />
 
             <div className="member-list">
               {members.map((member) => (
