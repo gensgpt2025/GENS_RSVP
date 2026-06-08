@@ -45,7 +45,7 @@ export async function getPlayerStatSummary(members: Member[]) {
     grouped.set(stat.member_id, current);
   }
 
-  return Array.from(grouped.values()).sort((a, b) => b.goals - a.goals || b.assists - a.assists || a.member_name.localeCompare(b.member_name, "ja"));
+  return Array.from(grouped.values()).sort((a, b) => b.points - a.points || b.goals - a.goals || b.assists - a.assists || a.member_name.localeCompare(b.member_name, "ja"));
 }
 
 export function statsForEvent(stats: PlayerStat[], eventSheetId: string | null) {

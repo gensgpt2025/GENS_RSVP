@@ -20,6 +20,12 @@ type StatsRow = {
   member_id: string;
   goals: string;
   assists: string;
+  assist: string;
+  goal: string;
+  g: string;
+  a: string;
+  ゴール: string;
+  アシスト: string;
   notes: string;
 };
 
@@ -164,12 +170,14 @@ function rowToEvent(row: SheetRow): SyncedSheetEvent | null {
 
 function rowToStat(row: StatsRow): SyncedSheetStat | null {
   if (!row.event_id || !row.member_id) return null;
+  const goals = parseOptionalNumber(row.goals) ?? parseOptionalNumber(row.goal) ?? parseOptionalNumber(row.g) ?? parseOptionalNumber(row.ゴール) ?? 0;
+  const assists = parseOptionalNumber(row.assists) ?? parseOptionalNumber(row.assist) ?? parseOptionalNumber(row.a) ?? parseOptionalNumber(row.アシスト) ?? 0;
 
   return {
     eventSheetId: row.event_id,
     memberId: row.member_id,
-    goals: parseOptionalNumber(row.goals) ?? 0,
-    assists: parseOptionalNumber(row.assists) ?? 0,
+    goals,
+    assists,
     notes: row.notes || null,
   };
 }
