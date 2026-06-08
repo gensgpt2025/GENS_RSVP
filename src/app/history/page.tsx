@@ -88,7 +88,8 @@ export default async function HistoryPage() {
                         {eventStats.length > 0
                           ? eventStats.map((stat) => {
                               const member = members.find((item) => item.id === stat.member_id || item.name === stat.member_id || item.name.startsWith(`${stat.member_id}_`));
-                              return `${member?.name ?? stat.member_id} G${stat.goals} A${stat.assists}`;
+                              const scores = [`G${stat.goals}`, `A${stat.assists}`].filter((item) => !item.endsWith("0"));
+                              return `${member?.name ?? stat.member_id} ${scores.join(" ")}`;
                             }).join(" / ")
                           : "-"}
                       </td>
