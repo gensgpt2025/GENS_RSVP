@@ -15,19 +15,7 @@ type SheetRow = {
   outcome: string;
 };
 
-type StatsRow = {
-  event_id: string;
-  member_id: string;
-  goals: string;
-  assists: string;
-  assist: string;
-  goal: string;
-  g: string;
-  a: string;
-  ゴール: string;
-  アシスト: string;
-  notes: string;
-};
+type StatsRow = Record<string, string>;
 
 export type SyncedSheetEvent = {
   sheetId: string;
@@ -100,6 +88,15 @@ function safeText(value: string | null | undefined) {
   return value?.trim() ?? "";
 }
 
+function pick(row: Record<string, string>, keys: string[]) {
+  for (const key of keys) {
+    const value = row[key];
+    if (safeText(value)) return value;
+  }
+
+  return "";
+}
+
 function parseTime(value: string | null | undefined) {
   const match = safeText(value).match(/^(\d{1,2}):(\d{2})$/);
   if (!match) return null;
@@ -169,16 +166,19 @@ function rowToEvent(row: SheetRow): SyncedSheetEvent | null {
 }
 
 function rowToStat(row: StatsRow): SyncedSheetStat | null {
-  if (!row.event_id || !row.member_id) return null;
-  const goals = parseOptionalNumber(row.goals) ?? parseOptionalNumber(row.goal) ?? parseOptionalNumber(row.g) ?? parseOptionalNumber(row.ゴール) ?? 0;
-  const assists = parseOptionalNumber(row.assists) ?? parseOptionalNumber(row.assist) ?? parseOptionalNumber(row.a) ?? parseOptionalNumber(row.アシスト) ?? 0;
+  const eventId = pick(row, ["event_id", "eventid", "event"]);
+  const memberId = pick(row, ["member_id", "memberid", "member", "number", "player_id", "playerid", "player"]);
+  if (!eventId || !memberId) return null;
+
+  const goals = parseOptionalNumber(pick(row, ["goals", "goal", "g", "得点", "ゴール"])) ?? 0;
+  const assists = parseOptionalNumber(pick(row, ["assists", "assist", "a", "アシスト"])) ?? 0;
 
   return {
-    eventSheetId: row.event_id,
-    memberId: row.member_id,
+    eventSheetId: eventId,
+    memberId,
     goals,
     assists,
-    notes: row.notes || null,
+    notes: pick(row, ["notes", "note", "memo", "メモ", "備考"]) || null,
   };
 }
 
@@ -189,7 +189,7 @@ function rowsToObjects(values: string[][]) {
   return rows.map((row) => {
     const object: Record<string, string> = {};
     header.forEach((key, index) => {
-      object[key.trim().toLowerCase()] = row[index]?.trim() ?? "";
+      object[key.trim().toLowerCase().replace(/[\s-]+/g, "_")] = row[index]?.trim() ?? "";
     });
     return object as SheetRow;
   });
@@ -207,7 +207,7 @@ export async function fetchSheetEvents() {
 
 export async function fetchSheetStats() {
   const sheetId = process.env.GOOGLE_SHEET_ID;
-  const range = process.env.GOOGLE_STATS_RANGE || "Stats!A:E";
+  const range = process.env.GOOGLE_STATS_RANGE || "Stats!A:Z";
   if (!sheetId) throw new Error("GOOGLE_SHEET_ID is required.");
 
   const token = await getAccessToken();
