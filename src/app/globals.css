@@ -567,6 +567,13 @@ button:hover,
   padding: 18px;
 }
 
+.year-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
 .history-table-wrap {
   overflow-x: auto;
 }

@@ -24,8 +24,7 @@ export async function getPlayerStats() {
   return rows as PlayerStat[];
 }
 
-export async function getPlayerStatSummary(members: Member[]) {
-  const stats = await getPlayerStats();
+export function summarizePlayerStats(stats: PlayerStat[], members: Member[]) {
   const grouped = new Map<string, PlayerStatSummary>();
 
   for (const stat of stats) {
@@ -60,6 +59,10 @@ export async function getPlayerStatSummary(members: Member[]) {
   }
 
   return Array.from(grouped.values()).sort((a, b) => b.points - a.points || b.goals - a.goals || b.assists - a.assists || a.member_name.localeCompare(b.member_name, "ja"));
+}
+
+export async function getPlayerStatSummary(members: Member[]) {
+  return summarizePlayerStats(await getPlayerStats(), members);
 }
 
 export function statsForEvent(stats: PlayerStat[], eventSheetId: string | null) {

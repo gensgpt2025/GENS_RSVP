@@ -3,7 +3,7 @@ import { logoutAction } from "@/app/actions";
 import { getCurrentUser } from "@/lib/auth";
 import { formatEventRange } from "@/lib/calendar";
 import { attendeeNames, countByStatus, eventDisplayTitle, getEventsWithRsvps, getMembers } from "@/lib/events";
-import { getPlayerStats, getPlayerStatSummary, statsForEvent } from "@/lib/stats";
+import { getPlayerStats, statsForEvent, summarizePlayerStats } from "@/lib/stats";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +12,14 @@ function resultText(event: { result_home: number | null; result_away: number | n
   return `${event.result_home}-${event.result_away}${event.outcome ? ` ${event.outcome}` : ""}`;
 }
 
-export default async function HistoryPage() {
+function eventYear(value: string) {
+  return new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    timeZone: "Asia/Tokyo",
+  }).format(new Date(value));
+}
+
+export default async function HistoryPage({ searchParams }: { searchParams: Promise<{ year?: string }> }) {
   const user = await getCurrentUser();
 
   if (!user) {
@@ -29,7 +36,13 @@ export default async function HistoryPage() {
   }
 
   const [events, members, stats] = await Promise.all([getEventsWithRsvps("past"), getMembers(), getPlayerStats()]);
-  const rankings = await getPlayerStatSummary(members);
+  const params = await searchParams;
+  const years = Array.from(new Set(events.map((event) => eventYear(event.start_at)))).sort((a, b) => Number(b) - Number(a));
+  const selectedYear = params.year && years.includes(params.year) ? params.year : years[0];
+  const filteredEvents = selectedYear ? events.filter((event) => eventYear(event.start_at) === selectedYear) : events;
+  const filteredSheetIds = new Set(filteredEvents.map((event) => event.sheet_id).filter(Boolean));
+  const filteredStats = stats.filter((stat) => filteredSheetIds.has(stat.event_sheet_id));
+  const rankings = summarizePlayerStats(filteredStats, members);
 
   return (
     <main className="app-shell">
@@ -57,7 +70,17 @@ export default async function HistoryPage() {
       </header>
 
       <section className="history-panel">
-        {events.length === 0 ? (
+        {years.length > 0 ? (
+          <div className="year-filter">
+            {years.map((year) => (
+              <a className={year === selectedYear ? "pill active" : "pill"} href={`/history?year=${year}`} key={year}>
+                {year}年度
+              </a>
+            ))}
+          </div>
+        ) : null}
+
+        {filteredEvents.length === 0 ? (
           <p className="empty-state">終了済みイベントはまだありません。</p>
         ) : (
           <div className="history-table-wrap">
@@ -76,9 +99,9 @@ export default async function HistoryPage() {
                 </tr>
               </thead>
               <tbody>
-                {events.map((event) => {
+                {filteredEvents.map((event) => {
                   const attendees = attendeeNames(event.rsvps);
-                  const eventStats = statsForEvent(stats, event.sheet_id);
+                  const eventStats = statsForEvent(filteredStats, event.sheet_id);
                   return (
                     <tr key={event.id}>
                       <td>{formatEventRange(event.start_at, event.end_at)}</td>
