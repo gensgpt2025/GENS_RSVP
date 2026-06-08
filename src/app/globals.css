@@ -596,45 +596,18 @@ button:hover,
   font-size: 13px;
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 10px;
+.stats-table {
+  min-width: 520px;
 }
 
-.stats-card {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
-  gap: 8px;
-  align-items: center;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.045);
-  padding: 10px;
-}
-
-.stats-card span {
-  display: inline-grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 999px;
-  background: rgba(201, 168, 106, 0.18);
-  color: var(--gold);
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.stats-card strong {
-  overflow: hidden;
-  text-overflow: ellipsis;
+.stats-table th:not(:nth-child(2)),
+.stats-table td:not(:nth-child(2)) {
+  text-align: center;
   white-space: nowrap;
 }
 
-.stats-card em {
-  color: var(--muted);
-  font-size: 12px;
-  font-style: normal;
+.stats-table td:last-child {
+  color: var(--gold);
   font-weight: 800;
 }
 

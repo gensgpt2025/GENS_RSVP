@@ -45,6 +45,20 @@ export async function getPlayerStatSummary(members: Member[]) {
     grouped.set(stat.member_id, current);
   }
 
+  for (const member of members) {
+    if (grouped.has(member.id) || grouped.has(member.name)) continue;
+    const number = member.name.match(/^\d+/)?.[0];
+    if (number && grouped.has(number)) continue;
+
+    grouped.set(number ?? member.id, {
+      member_id: number ?? member.id,
+      member_name: member.name,
+      goals: 0,
+      assists: 0,
+      points: 0,
+    });
+  }
+
   return Array.from(grouped.values()).sort((a, b) => b.points - a.points || b.goals - a.goals || b.assists - a.assists || a.member_name.localeCompare(b.member_name, "ja"));
 }
 

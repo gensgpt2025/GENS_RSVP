@@ -116,16 +116,29 @@ export default async function HistoryPage() {
         {rankings.length === 0 ? (
           <p className="empty-state">個人成績はまだありません。</p>
         ) : (
-          <div className="stats-grid">
-            {rankings.map((player, index) => (
-              <div className="stats-card" key={player.member_id}>
-                <span>{index + 1}</span>
-                <strong>{player.member_name}</strong>
-                <em>G {player.goals}</em>
-                <em>A {player.assists}</em>
-                <em>PTS {player.points}</em>
-              </div>
-            ))}
+          <div className="history-table-wrap">
+            <table className="history-table stats-table">
+              <thead>
+                <tr>
+                  <th>順位</th>
+                  <th>メンバー</th>
+                  <th>得点</th>
+                  <th>アシスト</th>
+                  <th>合計</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rankings.map((player, index) => (
+                  <tr key={player.member_id}>
+                    <td>{index + 1}</td>
+                    <td>{player.member_name}</td>
+                    <td>{player.goals}</td>
+                    <td>{player.assists}</td>
+                    <td>{player.points}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </section>
