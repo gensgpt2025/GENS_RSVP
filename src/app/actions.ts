@@ -220,6 +220,10 @@ export async function syncSheetEventsAction() {
   await ensureSchema();
 
   const [events, stats] = await Promise.all([fetchSheetEvents(), fetchSheetStats()]);
+  if (events.length === 0) {
+    throw new Error("Google Sheet schedule rows were empty. Check GOOGLE_SHEET_RANGE and the Schedule sheet headers.");
+  }
+
   const sheetIds = new Set(events.map((event) => event.sheetId));
   const existingSyncedEvents = await sql`SELECT sheet_id FROM events WHERE sheet_id IS NOT NULL`;
 

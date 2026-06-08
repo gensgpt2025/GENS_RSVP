@@ -90,14 +90,18 @@ async function getAccessToken() {
   return data.access_token;
 }
 
-function parseTime(value: string) {
-  const match = value.trim().match(/^(\d{1,2}):(\d{2})$/);
+function safeText(value: string | null | undefined) {
+  return value?.trim() ?? "";
+}
+
+function parseTime(value: string | null | undefined) {
+  const match = safeText(value).match(/^(\d{1,2}):(\d{2})$/);
   if (!match) return null;
   return { hour: Number(match[1]), minute: Number(match[2]) };
 }
 
-function parseDate(value: string) {
-  const match = value.trim().match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
+function parseDate(value: string | null | undefined) {
+  const match = safeText(value).match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
   if (!match) return null;
   return { year: Number(match[1]), month: Number(match[2]), day: Number(match[3]) };
 }
@@ -107,21 +111,23 @@ function toIso(date: ReturnType<typeof parseDate>, time: ReturnType<typeof parse
   return new Date(Date.UTC(date.year, date.month - 1, date.day, time.hour - 9, time.minute)).toISOString();
 }
 
-function parseOptionalNumber(value: string) {
-  if (!value.trim()) return null;
-  const normalized = value.replace(/[０-９]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xfee0));
+function parseOptionalNumber(value: string | null | undefined) {
+  const text = safeText(value);
+  if (!text) return null;
+  const normalized = text.replace(/[０-９]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xfee0));
   const parsed = Number(normalized);
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function mapType(type: string, fallbackTitle: string) {
-  const normalized = type.trim().toLowerCase();
-  if (fallbackTitle) return fallbackTitle;
+function mapType(type: string | null | undefined, fallbackTitle: string | null | undefined) {
+  const title = safeText(fallbackTitle);
+  const normalized = safeText(type).toLowerCase();
+  if (title) return title;
   if (normalized === "match") return "練習試合";
   if (normalized === "league") return "県リーグ";
   if (normalized === "training") return "トレーニング";
   if (normalized === "other") return "その他";
-  return fallbackTitle || type;
+  return title || safeText(type);
 }
 
 function rowToEvent(row: SheetRow): SyncedSheetEvent | null {
