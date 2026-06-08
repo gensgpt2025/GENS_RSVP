@@ -2,9 +2,15 @@ import { ArrowLeft, Shield } from "lucide-react";
 import { logoutAction } from "@/app/actions";
 import { getCurrentUser } from "@/lib/auth";
 import { formatEventRange } from "@/lib/calendar";
-import { attendeeNames, countByStatus, eventDisplayTitle, getEventsWithRsvps } from "@/lib/events";
+import { attendeeNames, countByStatus, eventDisplayTitle, getEventsWithRsvps, getMembers } from "@/lib/events";
+import { getPlayerStats, getPlayerStatSummary, statsForEvent } from "@/lib/stats";
 
 export const dynamic = "force-dynamic";
+
+function resultText(event: { result_home: number | null; result_away: number | null; outcome: string | null }) {
+  if (event.result_home === null || event.result_away === null) return "-";
+  return `${event.result_home}-${event.result_away}${event.outcome ? ` ${event.outcome}` : ""}`;
+}
 
 export default async function HistoryPage() {
   const user = await getCurrentUser();
@@ -22,7 +28,8 @@ export default async function HistoryPage() {
     );
   }
 
-  const events = await getEventsWithRsvps("past");
+  const [events, members, stats] = await Promise.all([getEventsWithRsvps("past"), getMembers(), getPlayerStats()]);
+  const rankings = await getPlayerStatSummary(members);
 
   return (
     <main className="app-shell">
@@ -59,6 +66,8 @@ export default async function HistoryPage() {
                 <tr>
                   <th>日時</th>
                   <th>イベント</th>
+                  <th>結果</th>
+                  <th>個人成績</th>
                   <th>場所</th>
                   <th>出席者</th>
                   <th>出席</th>
@@ -69,10 +78,20 @@ export default async function HistoryPage() {
               <tbody>
                 {events.map((event) => {
                   const attendees = attendeeNames(event.rsvps);
+                  const eventStats = statsForEvent(stats, event.sheet_id);
                   return (
                     <tr key={event.id}>
                       <td>{formatEventRange(event.start_at, event.end_at)}</td>
                       <td>{eventDisplayTitle(event)}</td>
+                      <td>{resultText(event)}</td>
+                      <td>
+                        {eventStats.length > 0
+                          ? eventStats.map((stat) => {
+                              const member = members.find((item) => item.id === stat.member_id || item.name === stat.member_id || item.name.startsWith(`${stat.member_id}_`));
+                              return `${member?.name ?? stat.member_id} G${stat.goals} A${stat.assists}`;
+                            }).join(" / ")
+                          : "-"}
+                      </td>
                       <td>{event.location || "-"}</td>
                       <td>{attendees.length > 0 ? attendees.join("、") : "-"}</td>
                       <td>{countByStatus(event.rsvps, "attending")}</td>
@@ -83,6 +102,30 @@ export default async function HistoryPage() {
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+      </section>
+
+      <section className="history-panel">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Stats</p>
+            <h2>個人成績</h2>
+          </div>
+        </div>
+        {rankings.length === 0 ? (
+          <p className="empty-state">個人成績はまだありません。</p>
+        ) : (
+          <div className="stats-grid">
+            {rankings.map((player, index) => (
+              <div className="stats-card" key={player.member_id}>
+                <span>{index + 1}</span>
+                <strong>{player.member_name}</strong>
+                <em>G {player.goals}</em>
+                <em>A {player.assists}</em>
+                <em>PTS {player.points}</em>
+              </div>
+            ))}
           </div>
         )}
       </section>

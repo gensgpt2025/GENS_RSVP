@@ -10,6 +10,17 @@ type SheetRow = {
   location: string;
   notes: string;
   opponent: string;
+  result_home: string;
+  result_away: string;
+  outcome: string;
+};
+
+type StatsRow = {
+  event_id: string;
+  member_id: string;
+  goals: string;
+  assists: string;
+  notes: string;
 };
 
 export type SyncedSheetEvent = {
@@ -19,8 +30,19 @@ export type SyncedSheetEvent = {
   opponent: string | null;
   description: string | null;
   location: string | null;
+  resultHome: number | null;
+  resultAway: number | null;
+  outcome: string | null;
   startIso: string;
   endIso: string;
+};
+
+export type SyncedSheetStat = {
+  eventSheetId: string;
+  memberId: string;
+  goals: number;
+  assists: number;
+  notes: string | null;
 };
 
 function base64Url(input: string | Buffer) {
@@ -85,6 +107,13 @@ function toIso(date: ReturnType<typeof parseDate>, time: ReturnType<typeof parse
   return new Date(Date.UTC(date.year, date.month - 1, date.day, time.hour - 9, time.minute)).toISOString();
 }
 
+function parseOptionalNumber(value: string) {
+  if (!value.trim()) return null;
+  const normalized = value.replace(/[０-９]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xfee0));
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 function mapType(type: string, fallbackTitle: string) {
   const normalized = type.trim().toLowerCase();
   if (fallbackTitle) return fallbackTitle;
@@ -119,8 +148,23 @@ function rowToEvent(row: SheetRow): SyncedSheetEvent | null {
       opponent: showOpponent && row.opponent ? row.opponent : "",
     }),
     location: row.location || null,
+    resultHome: parseOptionalNumber(row.result_home),
+    resultAway: parseOptionalNumber(row.result_away),
+    outcome: row.outcome || null,
     startIso,
     endIso,
+  };
+}
+
+function rowToStat(row: StatsRow): SyncedSheetStat | null {
+  if (!row.event_id || !row.member_id) return null;
+
+  return {
+    eventSheetId: row.event_id,
+    memberId: row.member_id,
+    goals: parseOptionalNumber(row.goals) ?? 0,
+    assists: parseOptionalNumber(row.assists) ?? 0,
+    notes: row.notes || null,
   };
 }
 
@@ -139,10 +183,25 @@ function rowsToObjects(values: string[][]) {
 
 export async function fetchSheetEvents() {
   const sheetId = process.env.GOOGLE_SHEET_ID;
-  const range = process.env.GOOGLE_SHEET_RANGE || "A:I";
+  const range = process.env.GOOGLE_SHEET_RANGE || "Schedule!A:L";
   if (!sheetId) throw new Error("GOOGLE_SHEET_ID is required.");
 
   const token = await getAccessToken();
+  const values = await fetchSheetValues(sheetId, range, token);
+  return rowsToObjects(values).map(rowToEvent).filter((event): event is SyncedSheetEvent => Boolean(event));
+}
+
+export async function fetchSheetStats() {
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  const range = process.env.GOOGLE_STATS_RANGE || "Stats!A:E";
+  if (!sheetId) throw new Error("GOOGLE_SHEET_ID is required.");
+
+  const token = await getAccessToken();
+  const values = await fetchSheetValues(sheetId, range, token, true);
+  return rowsToObjects(values).map((row) => rowToStat(row as unknown as StatsRow)).filter((stat): stat is SyncedSheetStat => Boolean(stat));
+}
+
+async function fetchSheetValues(sheetId: string, range: string, token: string, optional = false) {
   const url = new URL(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}`);
   url.searchParams.set("majorDimension", "ROWS");
   url.searchParams.set("valueRenderOption", "FORMATTED_VALUE");
@@ -153,9 +212,10 @@ export async function fetchSheetEvents() {
   });
 
   if (!response.ok) {
+    if (optional) return [];
     throw new Error(`Failed to fetch Google Sheet: ${response.status}`);
   }
 
   const data = (await response.json()) as { values?: string[][] };
-  return rowsToObjects(data.values ?? []).map(rowToEvent).filter((event): event is SyncedSheetEvent => Boolean(event));
+  return data.values ?? [];
 }

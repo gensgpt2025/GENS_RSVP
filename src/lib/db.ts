@@ -51,6 +51,9 @@ async function createSchema() {
       title TEXT NOT NULL,
       description TEXT,
       location TEXT,
+      result_home INTEGER,
+      result_away INTEGER,
+      outcome TEXT,
       start_at TIMESTAMPTZ NOT NULL,
       end_at TIMESTAMPTZ NOT NULL,
       created_by TEXT REFERENCES members(id) ON DELETE SET NULL,
@@ -59,7 +62,22 @@ async function createSchema() {
   `;
 
   await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS sheet_id TEXT`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS result_home INTEGER`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS result_away INTEGER`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS outcome TEXT`;
   await sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_events_sheet_id ON events(sheet_id) WHERE sheet_id IS NOT NULL`;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS player_stats (
+      event_sheet_id TEXT NOT NULL,
+      member_id TEXT NOT NULL,
+      goals INTEGER NOT NULL DEFAULT 0,
+      assists INTEGER NOT NULL DEFAULT 0,
+      notes TEXT,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      PRIMARY KEY (event_sheet_id, member_id)
+    )
+  `;
 
   await sql`
     CREATE TABLE IF NOT EXISTS rsvps (
@@ -74,5 +92,6 @@ async function createSchema() {
 
   await sql`CREATE INDEX IF NOT EXISTS idx_events_start_at ON events(start_at)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_player_stats_event_sheet_id ON player_stats(event_sheet_id)`;
 
 }

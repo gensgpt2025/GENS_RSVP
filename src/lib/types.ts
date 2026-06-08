@@ -18,10 +18,23 @@ export type EventItem = {
   opponent?: string;
   description: string | null;
   location: string | null;
+  result_home: number | null;
+  result_away: number | null;
+  outcome: string | null;
   start_at: string;
   end_at: string;
   created_by: string | null;
   created_at: string;
+};
+
+export type PlayerStat = {
+  event_sheet_id: string;
+  member_id: string;
+  member_name?: string;
+  goals: number;
+  assists: number;
+  notes: string | null;
+  updated_at: string;
 };
 
 export type Rsvp = {

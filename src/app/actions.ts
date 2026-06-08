@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { loginAsMember, logout, requireUser } from "@/lib/auth";
 import { ensureSchema, sql } from "@/lib/db";
 import { hashPassword } from "@/lib/security";
-import { fetchSheetEvents } from "@/lib/sheets";
+import { fetchSheetEvents, fetchSheetStats } from "@/lib/sheets";
 import type { RsvpStatus } from "@/lib/types";
 
 export type MemberFormState = {
@@ -219,16 +219,29 @@ export async function syncSheetEventsAction() {
   const user = await requireUser();
   await ensureSchema();
 
-  const events = await fetchSheetEvents();
+  const [events, stats] = await Promise.all([fetchSheetEvents(), fetchSheetStats()]);
+  const sheetIds = new Set(events.map((event) => event.sheetId));
+  const existingSyncedEvents = await sql`SELECT sheet_id FROM events WHERE sheet_id IS NOT NULL`;
+
+  for (const row of existingSyncedEvents.rows as { sheet_id: string }[]) {
+    if (!sheetIds.has(row.sheet_id)) {
+      await sql`DELETE FROM events WHERE sheet_id = ${row.sheet_id}`;
+      await sql`DELETE FROM player_stats WHERE event_sheet_id = ${row.sheet_id}`;
+    }
+  }
+
   for (const event of events) {
     await sql`
-      INSERT INTO events (id, sheet_id, title, description, location, start_at, end_at, created_by)
+      INSERT INTO events (id, sheet_id, title, description, location, result_home, result_away, outcome, start_at, end_at, created_by)
       VALUES (
         ${crypto.randomUUID()},
         ${event.sheetId},
         ${event.title},
         ${event.description},
         ${event.location},
+        ${event.resultHome},
+        ${event.resultAway},
+        ${event.outcome},
         ${event.startIso},
         ${event.endIso},
         ${user.id}
@@ -237,8 +250,33 @@ export async function syncSheetEventsAction() {
       SET title = EXCLUDED.title,
           description = EXCLUDED.description,
           location = EXCLUDED.location,
+          result_home = EXCLUDED.result_home,
+          result_away = EXCLUDED.result_away,
+          outcome = EXCLUDED.outcome,
           start_at = EXCLUDED.start_at,
           end_at = EXCLUDED.end_at
+    `;
+  }
+
+  const statKeys = new Set(stats.map((stat) => `${stat.eventSheetId}:${stat.memberId}`));
+  if (stats.length > 0) {
+    const existingStats = await sql`SELECT event_sheet_id, member_id FROM player_stats`;
+    for (const row of existingStats.rows as { event_sheet_id: string; member_id: string }[]) {
+      if (!statKeys.has(`${row.event_sheet_id}:${row.member_id}`)) {
+        await sql`DELETE FROM player_stats WHERE event_sheet_id = ${row.event_sheet_id} AND member_id = ${row.member_id}`;
+      }
+    }
+  }
+
+  for (const stat of stats) {
+    await sql`
+      INSERT INTO player_stats (event_sheet_id, member_id, goals, assists, notes, updated_at)
+      VALUES (${stat.eventSheetId}, ${stat.memberId}, ${stat.goals}, ${stat.assists}, ${stat.notes}, NOW())
+      ON CONFLICT (event_sheet_id, member_id) DO UPDATE
+      SET goals = EXCLUDED.goals,
+          assists = EXCLUDED.assists,
+          notes = EXCLUDED.notes,
+          updated_at = NOW()
     `;
   }
 
