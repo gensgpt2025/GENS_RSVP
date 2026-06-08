@@ -1324,6 +1324,33 @@ button:hover,
     align-self: center;
   }
 
+  .stats-table {
+    min-width: 0;
+    table-layout: fixed;
+  }
+
+  .stats-table th,
+  .stats-table td {
+    padding: 9px 5px;
+    font-size: 12px;
+  }
+
+  .stats-table th:first-child,
+  .stats-table td:first-child {
+    width: 42px;
+  }
+
+  .stats-table th:nth-child(2),
+  .stats-table td:nth-child(2) {
+    width: auto;
+    overflow-wrap: anywhere;
+  }
+
+  .stats-table th:nth-child(n + 3),
+  .stats-table td:nth-child(n + 3) {
+    width: 44px;
+  }
+
   .mobile-event-list {
     gap: 8px;
     width: 100%;
