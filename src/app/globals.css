@@ -380,6 +380,12 @@ button:hover,
 
 .event-card {
   padding: 22px;
+  scroll-margin-top: 18px;
+}
+
+.event-card:target {
+  border-color: rgba(201, 168, 106, 0.82);
+  box-shadow: 0 0 0 2px rgba(201, 168, 106, 0.2), var(--shadow);
 }
 
 .event-main {
@@ -603,6 +609,16 @@ button:hover,
   font-size: 13px;
 }
 
+.history-table tr {
+  scroll-margin-top: 18px;
+}
+
+.history-table tbody tr:target {
+  background: rgba(201, 168, 106, 0.12);
+  outline: 1px solid rgba(201, 168, 106, 0.58);
+  outline-offset: -1px;
+}
+
 .stats-table {
   min-width: 520px;
 }
@@ -686,10 +702,13 @@ button:hover,
 }
 
 .calendar-event {
+  display: block;
   border: 1px solid rgba(201, 168, 106, 0.28);
   border-radius: 6px;
   background: rgba(201, 168, 106, 0.1);
+  color: inherit;
   padding: 7px;
+  text-decoration: none;
 }
 
 .calendar-event-league {
@@ -754,12 +773,14 @@ button:hover,
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
+  color: inherit;
   min-width: 0;
   min-height: 84px;
   max-height: 96px;
   overflow: hidden;
   padding: 8px;
   position: relative;
+  text-decoration: none;
 }
 
 .mobile-event-card::before {

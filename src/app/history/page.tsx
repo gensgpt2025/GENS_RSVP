@@ -13,10 +13,11 @@ function resultText(event: { result_home: number | null; result_away: number | n
 }
 
 function eventYear(value: string) {
-  return new Intl.DateTimeFormat("ja-JP", {
+  const parts = new Intl.DateTimeFormat("ja-JP", {
     year: "numeric",
     timeZone: "Asia/Tokyo",
-  }).format(new Date(value));
+  }).formatToParts(new Date(value));
+  return parts.find((part) => part.type === "year")?.value ?? "";
 }
 
 export default async function HistoryPage({ searchParams }: { searchParams: Promise<{ year?: string }> }) {
@@ -103,7 +104,7 @@ export default async function HistoryPage({ searchParams }: { searchParams: Prom
                   const attendees = attendeeNames(event.rsvps);
                   const eventStats = statsForEvent(filteredStats, event.sheet_id);
                   return (
-                    <tr key={event.id}>
+                    <tr id={`event-${event.id}`} key={event.id}>
                       <td>{formatEventRange(event.start_at, event.end_at)}</td>
                       <td>{eventDisplayTitle(event)}</td>
                       <td>{resultText(event)}</td>

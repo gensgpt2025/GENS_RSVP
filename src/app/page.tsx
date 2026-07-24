@@ -208,7 +208,7 @@ export default async function Home() {
               const showOpponent = (meta.type === "match" || meta.type === "league") && meta.opponent;
               const displayTitle = eventDisplayTitle(event);
               return (
-                <article className="event-card" key={event.id}>
+                <article className="event-card" id={`event-${event.id}`} key={event.id}>
                   <div className="event-main">
                     <div>
                       <h3>{displayTitle}</h3>
